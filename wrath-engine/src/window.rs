@@ -3,6 +3,7 @@ pub trait Window {
 	fn get_title(&self) -> &str;
 	fn get_size(&self) -> (u32, u32);
 	fn update(&mut self);
+	fn close_requested(&self) -> bool;
 }
 
 pub struct WindowProps {

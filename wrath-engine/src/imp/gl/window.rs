@@ -2,6 +2,7 @@ pub struct Window {
 	inner: glutin::Window,
 	evt_loop: glutin::EventsLoop,
 	title: String,
+	close_requested: bool,
 }
 
 impl Window {
@@ -15,6 +16,7 @@ impl Window {
 			inner: win,
 			evt_loop: el,
 			title,
+			close_requested: false,
 		}
 	}
 }
@@ -30,18 +32,25 @@ impl crate::Window for Window {
 		self.inner.get_inner_size().unwrap().into()
 	}
 	fn update(&mut self) {
-		self.evt_loop.poll_events(|event| {
-			match event {
-				glutin::Event::WindowEvent { event, .. } => {
-					match event {
-						glutin::WindowEvent::CloseRequested => {
-							println!("time to do some real shit");
-						}
-						_ => {}
-					}
-				},
-				_ => {},
-			}
+		// Temporary work-around, should use
+		// some event queue in the future.
+		let mut close_requested = false;
+
+		self.evt_loop.poll_events(|event| match event {
+			glutin::Event::WindowEvent { event, .. } => match event {
+				glutin::WindowEvent::CloseRequested => {
+					close_requested = true;
+				}
+				_ => {}
+			},
+			_ => {}
 		});
+
+		if close_requested {
+			self.close_requested = true;
+		}
+	}
+	fn close_requested(&self) -> bool {
+		self.close_requested
 	}
 }
