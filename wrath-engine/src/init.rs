@@ -1,7 +1,7 @@
 use crate::CallbackHandler;
 use crate::Engine;
 
-pub fn init<T>(mut handler: T) where T: CallbackHandler {
+pub fn init<T: CallbackHandler>(mut handler: T) {
 	let mut engine = Engine::new();
 	handler.on_create(&mut engine);
 	
