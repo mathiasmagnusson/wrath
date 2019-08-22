@@ -1,8 +1,10 @@
+use crate::Event;
+
 pub trait Window {
 	fn set_title(&mut self, title: String);
 	fn get_title(&self) -> &str;
 	fn get_size(&self) -> (u32, u32);
-	fn update(&mut self);
+	fn update(&mut self) -> Vec<Box<dyn Event>>;
 	fn close_requested(&self) -> bool;
 }
 

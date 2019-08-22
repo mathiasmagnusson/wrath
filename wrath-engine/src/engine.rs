@@ -1,9 +1,12 @@
+use crate::events::EventType;
+use crate::LayerStack;
 use crate::Window;
 use crate::WindowProps;
 
 pub struct Engine {
 	window: Option<Box<dyn Window>>,
 	is_running: bool,
+	layer_stack: LayerStack,
 }
 
 impl Engine {
@@ -11,6 +14,7 @@ impl Engine {
 		Self {
 			window: None,
 			is_running: true,
+			layer_stack: LayerStack::new(),
 		}
 	}
 	pub fn create_window(&mut self, props: WindowProps) {
@@ -20,9 +24,11 @@ impl Engine {
 	}
 	pub fn update(&mut self) {
 		if let Some(window) = &mut self.window {
-			window.update();
-			if window.close_requested() {
-				self.is_running = false;
+			for event in window.update() {
+				if event.event_type() == EventType::WindowCloseRequested {
+					self.is_running = false;
+				}
+				self.layer_stack.submit(event);
 			}
 		}
 	}
@@ -31,5 +37,8 @@ impl Engine {
 	}
 	pub fn exit(&mut self) {
 		self.is_running = false;
+	}
+	pub fn layer_stack(&mut self) -> &mut LayerStack {
+		&mut self.layer_stack
 	}
 }
