@@ -1,8 +1,10 @@
 mod application_events;
 mod keyboard_events;
+mod mouse_events;
 
 pub use application_events::*;
 pub use keyboard_events::*;
+pub use mouse_events::*;
 
 use crate::Layer;
 
@@ -18,4 +20,9 @@ pub enum EventType {
 	WindowResized,
 	KeyPressed,
 	KeyReleased,
+	TextWritten,
+	MouseDown,
+	MouseUp,
+	MouseMove,
+	MouseScrolled
 }

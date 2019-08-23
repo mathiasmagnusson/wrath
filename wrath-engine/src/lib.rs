@@ -10,16 +10,15 @@ mod engine;
 mod events;
 mod imp;
 mod init;
-mod input;
 mod layer;
 mod window;
 
+pub mod input;
 
 pub use callback_handler::CallbackHandler;
 pub use engine::Engine;
 pub use events::Event;
 pub use init::init;
-pub use input::button;
 pub use input::Button;
 pub use input::InputState;
 pub use layer::Layer;

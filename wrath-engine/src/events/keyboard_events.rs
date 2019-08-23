@@ -20,7 +20,7 @@ impl Event for KeyPressedEvent {
 		self.is_handled
 	}
 	fn dispatch(&mut self, layer: &mut dyn Layer) {
-		self.is_handled = layer.on_key_pressed(self.button, self.repeat);
+		self.is_handled = layer.on_key_press(self.button, self.repeat);
 	}
 	fn event_type(&self) -> EventType {
 		EventType::KeyPressed
@@ -43,9 +43,32 @@ impl Event for KeyReleasedEvent {
 		self.is_handled
 	}
 	fn dispatch(&mut self, layer: &mut dyn Layer) {
-		self.is_handled = layer.on_key_released(self.button);
+		self.is_handled = layer.on_key_release(self.button);
 	}
 	fn event_type(&self) -> EventType {
 		EventType::KeyReleased
+	}
+}
+
+pub struct TextWrittenEvent {
+	is_handled: bool,
+	which: char,
+}
+
+impl TextWrittenEvent {
+	pub fn boxed(which: char) -> Box<Self> {
+		box Self { is_handled: false, which }
+	}
+}
+
+impl Event for TextWrittenEvent {
+	fn is_handled(&self) -> bool {
+		self.is_handled
+	}
+	fn dispatch(&mut self, layer: &mut dyn Layer) {
+		self.is_handled = layer.on_text_written(self.which);
+	}
+	fn event_type(&self) -> EventType {
+		EventType::TextWritten
 	}
 }

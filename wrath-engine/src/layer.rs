@@ -4,6 +4,7 @@ use std::time::Duration;
 
 use crate::Button;
 use crate::Event;
+use crate::Float;
 
 pub struct LayerStack {
 	inner: VecDeque<(Box<dyn Layer>, LayerHandle)>,
@@ -71,6 +72,11 @@ pub trait Layer {
 	fn on_render(&mut self) {}
 	fn on_window_close_requested(&mut self) {}
 	fn on_window_resize(&mut self, size: (u32, u32)) {}
-	fn on_key_pressed(&mut self, button: Button, repeat: bool) -> bool { false }
-	fn on_key_released(&mut self, button: Button) -> bool { false }
+	fn on_key_press(&mut self, button: Button, repeat: bool) -> bool { false }
+	fn on_key_release(&mut self, button: Button) -> bool { false }
+	fn on_text_written(&mut self, which: char) -> bool { false }
+	fn on_mouse_down(&mut self, button: Button) -> bool { false }
+	fn on_mouse_up(&mut self, button: Button) -> bool { false }
+	fn on_mouse_move(&mut self, position: (u32, u32), delta: (i32, i32)) -> bool { false }
+	fn on_mouse_scroll(&mut self, delta: (Float, Float)) -> bool { false }
 }

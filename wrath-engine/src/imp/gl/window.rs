@@ -1,10 +1,16 @@
-use crate::button;
-use crate::Button;
-use crate::Event;
-use crate::events::WindowCloseRequestedEvent;
-use crate::events::WindowResizedEvent;
 use crate::events::KeyPressedEvent;
 use crate::events::KeyReleasedEvent;
+use crate::events::MouseDownEvent;
+use crate::events::MouseMoveEvent;
+use crate::events::MouseScrolledEvent;
+use crate::events::MouseUpEvent;
+use crate::events::TextWrittenEvent;
+use crate::events::WindowCloseRequestedEvent;
+use crate::events::WindowResizedEvent;
+use crate::input::get_mouse_position;
+use crate::Button;
+use crate::Event;
+use crate::Float;
 
 pub struct Window {
 	inner: glutin::Window,
@@ -50,32 +56,32 @@ impl crate::Window for Window {
 				glutin::WindowEvent::Resized(size) => {
 					events.push(WindowResizedEvent::boxed(size.into()))
 				}
-				glutin::WindowEvent::KeyboardInput { input, ..} => {
+				glutin::WindowEvent::KeyboardInput { input, .. } => {
 					fn convert_key_event(input: glutin::KeyboardInput) -> Button {
-						use button::*;
+						use Button::*;
 						let key = match input.virtual_keycode {
 							Some(key) => key,
-							None => return UNKNOWN,
+							None => return Unknown,
 						};
 						match key {
-							glutin::VirtualKeyCode::Space => SPACE,
-							glutin::VirtualKeyCode::Apostrophe => APOSTROPHE,
-							glutin::VirtualKeyCode::Comma => COMMA,
-							glutin::VirtualKeyCode::Period => PERIOD,
-							glutin::VirtualKeyCode::Slash => SLASH,
-							glutin::VirtualKeyCode::Grave => TILDE,
-							glutin::VirtualKeyCode::Key1 => NUM1,
-							glutin::VirtualKeyCode::Key2 => NUM2,
-							glutin::VirtualKeyCode::Key3 => NUM3,
-							glutin::VirtualKeyCode::Key4 => NUM4,
-							glutin::VirtualKeyCode::Key5 => NUM5,
-							glutin::VirtualKeyCode::Key6 => NUM6,
-							glutin::VirtualKeyCode::Key7 => NUM7,
-							glutin::VirtualKeyCode::Key8 => NUM8,
-							glutin::VirtualKeyCode::Key9 => NUM9,
-							glutin::VirtualKeyCode::Key0 => NUM0,
-							glutin::VirtualKeyCode::Subtract => MINUS,
-							glutin::VirtualKeyCode::Equals => EQUALS,
+							glutin::VirtualKeyCode::Space => Space,
+							glutin::VirtualKeyCode::Apostrophe => Apostrophe,
+							glutin::VirtualKeyCode::Comma => Comma,
+							glutin::VirtualKeyCode::Period => Period,
+							glutin::VirtualKeyCode::Slash => Slash,
+							glutin::VirtualKeyCode::Grave => Tilde,
+							glutin::VirtualKeyCode::Key1 => Num1,
+							glutin::VirtualKeyCode::Key2 => Num2,
+							glutin::VirtualKeyCode::Key3 => Num3,
+							glutin::VirtualKeyCode::Key4 => Num4,
+							glutin::VirtualKeyCode::Key5 => Num5,
+							glutin::VirtualKeyCode::Key6 => Num6,
+							glutin::VirtualKeyCode::Key7 => Num7,
+							glutin::VirtualKeyCode::Key8 => Num8,
+							glutin::VirtualKeyCode::Key9 => Num9,
+							glutin::VirtualKeyCode::Key0 => Num0,
+							glutin::VirtualKeyCode::Subtract => Minus,
+							glutin::VirtualKeyCode::Equals => Equals,
 							glutin::VirtualKeyCode::A => A,
 							glutin::VirtualKeyCode::B => B,
 							glutin::VirtualKeyCode::C => C,
@@ -102,29 +108,29 @@ impl crate::Window for Window {
 							glutin::VirtualKeyCode::X => X,
 							glutin::VirtualKeyCode::Y => Y,
 							glutin::VirtualKeyCode::Z => Z,
-							glutin::VirtualKeyCode::LBracket => L_BRACKET,
-							glutin::VirtualKeyCode::RBracket => R_BRACKET,
-							glutin::VirtualKeyCode::Backslash => BACKSLASH,
-							glutin::VirtualKeyCode::Semicolon => SEMICOLON,
-							glutin::VirtualKeyCode::Escape => ESC,
-							glutin::VirtualKeyCode::Return => ENTER,
-							glutin::VirtualKeyCode::Tab => TAB,
-							glutin::VirtualKeyCode::Back => BACKSPACE,
-							glutin::VirtualKeyCode::Insert => INSERT,
-							glutin::VirtualKeyCode::Delete => DELETE,
-							glutin::VirtualKeyCode::Right => ARROW_RIGHT,
-							glutin::VirtualKeyCode::Left => ARROW_LEFT,
-							glutin::VirtualKeyCode::Down => ARROW_DOWN,
-							glutin::VirtualKeyCode::Up => ARROW_UP,
-							glutin::VirtualKeyCode::PageUp => PG_UP,
-							glutin::VirtualKeyCode::PageDown => PG_DOWN,
-							glutin::VirtualKeyCode::Home => HOME,
-							glutin::VirtualKeyCode::End => END,
-							glutin::VirtualKeyCode::Capital => CAPS_LOCK,
-							glutin::VirtualKeyCode::Scroll => SCROLL_LOCK,
-							glutin::VirtualKeyCode::Numlock => NUMLOCK,
-							glutin::VirtualKeyCode::Snapshot => PRINT_SCREEN,
-							glutin::VirtualKeyCode::Pause => PAUSE,
+							glutin::VirtualKeyCode::LBracket => BracketLeft,
+							glutin::VirtualKeyCode::RBracket => BracketRight,
+							glutin::VirtualKeyCode::Backslash => Backslash,
+							glutin::VirtualKeyCode::Semicolon => Semicolon,
+							glutin::VirtualKeyCode::Escape => Esc,
+							glutin::VirtualKeyCode::Return => Enter,
+							glutin::VirtualKeyCode::Tab => Tab,
+							glutin::VirtualKeyCode::Back => Backspace,
+							glutin::VirtualKeyCode::Insert => Insert,
+							glutin::VirtualKeyCode::Delete => Delete,
+							glutin::VirtualKeyCode::Right => ArrowRight,
+							glutin::VirtualKeyCode::Left => ArrowLeft,
+							glutin::VirtualKeyCode::Down => ArrowDown,
+							glutin::VirtualKeyCode::Up => ArrowUp,
+							glutin::VirtualKeyCode::PageUp => PgUp,
+							glutin::VirtualKeyCode::PageDown => PgDown,
+							glutin::VirtualKeyCode::Home => Home,
+							glutin::VirtualKeyCode::End => End,
+							glutin::VirtualKeyCode::Capital => CapsLock,
+							glutin::VirtualKeyCode::Scroll => ScrollLock,
+							glutin::VirtualKeyCode::Numlock => NumLock,
+							glutin::VirtualKeyCode::Snapshot => PrintScreen,
+							glutin::VirtualKeyCode::Pause => Pause,
 							glutin::VirtualKeyCode::F1 => F1,
 							glutin::VirtualKeyCode::F2 => F2,
 							glutin::VirtualKeyCode::F3 => F3,
@@ -137,42 +143,92 @@ impl crate::Window for Window {
 							glutin::VirtualKeyCode::F10 => F10,
 							glutin::VirtualKeyCode::F11 => F11,
 							glutin::VirtualKeyCode::F12 => F12,
-							glutin::VirtualKeyCode::Numpad0 => NUMPAD0,
-							glutin::VirtualKeyCode::Numpad1 => NUMPAD1,
-							glutin::VirtualKeyCode::Numpad2 => NUMPAD2,
-							glutin::VirtualKeyCode::Numpad3 => NUMPAD3,
-							glutin::VirtualKeyCode::Numpad4 => NUMPAD4,
-							glutin::VirtualKeyCode::Numpad5 => NUMPAD5,
-							glutin::VirtualKeyCode::Numpad6 => NUMPAD6,
-							glutin::VirtualKeyCode::Numpad7 => NUMPAD7,
-							glutin::VirtualKeyCode::Numpad8 => NUMPAD8,
-							glutin::VirtualKeyCode::Numpad9 => NUMPAD9,
-							glutin::VirtualKeyCode::NumpadComma => NUMPAD_DEC,
-							glutin::VirtualKeyCode::Divide => NUMPAD_DIV,
-							glutin::VirtualKeyCode::Multiply => NUMPAD_MULT,
-							glutin::VirtualKeyCode::Minus => NUMPAD_SUB,
-							glutin::VirtualKeyCode::Add => NUMPAD_ADD,
-							glutin::VirtualKeyCode::NumpadEnter => NUMPAD_ENTER,
-							glutin::VirtualKeyCode::NumpadEquals => NUMPAD_EQ,
-							glutin::VirtualKeyCode::LShift => L_SHIFT,
-							glutin::VirtualKeyCode::LControl => L_CTRL,
-							glutin::VirtualKeyCode::LAlt => L_ALT,
-							glutin::VirtualKeyCode::LWin => L_SUPER,
-							glutin::VirtualKeyCode::RShift => R_SHIFT,
-							glutin::VirtualKeyCode::RControl => R_CTRL,
-							glutin::VirtualKeyCode::RAlt => R_ALT,
-							glutin::VirtualKeyCode::RWin => R_SUPER,
-							_ => UNKNOWN,
+							glutin::VirtualKeyCode::Numpad0 => NumPad0,
+							glutin::VirtualKeyCode::Numpad1 => NumPad1,
+							glutin::VirtualKeyCode::Numpad2 => NumPad2,
+							glutin::VirtualKeyCode::Numpad3 => NumPad3,
+							glutin::VirtualKeyCode::Numpad4 => NumPad4,
+							glutin::VirtualKeyCode::Numpad5 => NumPad5,
+							glutin::VirtualKeyCode::Numpad6 => NumPad6,
+							glutin::VirtualKeyCode::Numpad7 => NumPad7,
+							glutin::VirtualKeyCode::Numpad8 => NumPad8,
+							glutin::VirtualKeyCode::Numpad9 => NumPad9,
+							glutin::VirtualKeyCode::NumpadComma => NumPadDec,
+							glutin::VirtualKeyCode::Divide => NumPadDiv,
+							glutin::VirtualKeyCode::Multiply => NumPadMult,
+							glutin::VirtualKeyCode::Minus => NumPadSub,
+							glutin::VirtualKeyCode::Add => NumPadAdd,
+							glutin::VirtualKeyCode::NumpadEnter => NumPadEnter,
+							glutin::VirtualKeyCode::NumpadEquals => NumPadEq,
+							glutin::VirtualKeyCode::LShift => LShift,
+							glutin::VirtualKeyCode::LControl => LCtrl,
+							glutin::VirtualKeyCode::LAlt => LAlt,
+							glutin::VirtualKeyCode::LWin => LSuper,
+							glutin::VirtualKeyCode::RShift => RShift,
+							glutin::VirtualKeyCode::RControl => RCtrl,
+							glutin::VirtualKeyCode::RAlt => RAlt,
+							glutin::VirtualKeyCode::RWin => RSuper,
+							_ => Unknown,
 						}
 					}
 					events.push(match input.state {
-						glutin::ElementState::Pressed => { // check if it's already pressed to determine if its a repeat or not
-							KeyPressedEvent::boxed(convert_key_event(input), false)
+						glutin::ElementState::Pressed => {
+							let button = convert_key_event(input);
+							KeyPressedEvent::boxed(button, button.is_pressed())
 						}
 						glutin::ElementState::Released => {
 							KeyReleasedEvent::boxed(convert_key_event(input))
 						}
 					})
+				}
+				glutin::WindowEvent::ReceivedCharacter(which) => {
+					events.push(TextWrittenEvent::boxed(which));
+				}
+				glutin::WindowEvent::MouseInput { state, button, .. } => match state {
+					glutin::ElementState::Pressed => {
+						events.push(MouseDownEvent::boxed(match button {
+							glutin::MouseButton::Left => Button::MouseLeft,
+							glutin::MouseButton::Middle => Button::MouseMiddle,
+							glutin::MouseButton::Right => Button::MouseRight,
+							glutin::MouseButton::Other(8) => Button::Mouse4,
+							glutin::MouseButton::Other(9) => Button::Mouse5,
+							// glutin::MouseButton::Other(2) => Button::Mouse6,
+							// glutin::MouseButton::Other(3) => Button::Mouse7,
+							// glutin::MouseButton::Other(4) => Button::Mouse8,
+							// TODO: are there more?
+							glutin::MouseButton::Other(_) => Button::Unknown,
+						}));
+					}
+					glutin::ElementState::Released => {
+						events.push(MouseUpEvent::boxed(match button {
+							glutin::MouseButton::Left => Button::MouseLeft,
+							glutin::MouseButton::Middle => Button::MouseMiddle,
+							glutin::MouseButton::Right => Button::MouseRight,
+							glutin::MouseButton::Other(8) => Button::Mouse4,
+							glutin::MouseButton::Other(9) => Button::Mouse5,
+							// glutin::MouseButton::Other(?) => Button::Mouse6,
+							// glutin::MouseButton::Other(?) => Button::Mouse7,
+							// glutin::MouseButton::Other(?) => Button::Mouse8,
+							// TODO: are there more?
+							glutin::MouseButton::Other(_) => Button::Unknown,
+						}));
+					}
+				},
+				glutin::WindowEvent::CursorMoved { position, .. } => {
+					let pos: (u32, u32) = (position.x as u32, position.y as u32);
+					let old_pos = get_mouse_position();
+					let delta: (i32, i32) = (
+						pos.0 as i32 - old_pos.0 as i32,
+						pos.1 as i32 - old_pos.1 as i32,
+					);
+					events.push(MouseMoveEvent::boxed(pos, delta));
+				}
+				glutin::WindowEvent::MouseWheel { delta, .. } => {
+					events.push(MouseScrolledEvent::boxed(match delta {
+						// TODO: maybe use some multiplier here m8
+						glutin::MouseScrollDelta::LineDelta(x, y) => (x.into(), y.into()),
+						glutin::MouseScrollDelta::PixelDelta(d) => (d.x as Float, d.y as Float),
+					}))
 				}
 				_ => {}
 			},
