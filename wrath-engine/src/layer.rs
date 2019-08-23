@@ -1,5 +1,4 @@
 use std::collections::VecDeque;
-use std::cmp::PartialEq;
 use std::ops::AddAssign;
 use std::time::Duration;
 
