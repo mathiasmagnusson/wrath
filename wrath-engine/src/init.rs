@@ -7,6 +7,7 @@ pub fn init<T: CallbackHandler>(mut handler: T) {
 	
 	while engine.is_running() {
 		engine.update();
+		handler.on_update(&mut engine);
 	}
 
 	handler.on_exit(&mut engine);

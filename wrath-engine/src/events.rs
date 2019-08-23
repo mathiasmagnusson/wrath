@@ -1,6 +1,8 @@
 mod application_events;
+mod keyboard_events;
 
 pub use application_events::*;
+pub use keyboard_events::*;
 
 use crate::Layer;
 
@@ -14,4 +16,6 @@ pub trait Event {
 pub enum EventType {
 	WindowCloseRequested,
 	WindowResized,
+	KeyPressed,
+	KeyReleased,
 }

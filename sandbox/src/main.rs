@@ -1,7 +1,9 @@
 #![feature(box_syntax)]
 
+use wrath::button;
 use wrath::CallbackHandler;
 use wrath::Engine;
+use wrath::InputState;
 use wrath::Layer;
 use wrath::LayerHandle;
 
@@ -24,6 +26,14 @@ impl CallbackHandler for Application {
 			size: (1080, 720),
 		});
 		self.ex_layer = engine.layer_stack().push_front(box ExampleLayer::new());
+	}
+	fn on_update(&mut self, _engine: &mut Engine) {
+		if InputState::mouse_position().0 > 100 {
+			println!("Faggot");
+		}
+		if InputState::is_pressed(button::S) {
+			println!("snopp");
+		}
 	}
 	fn on_exit(&mut self, engine: &mut Engine) {
 		engine.layer_stack().remove_layer(self.ex_layer);

@@ -20,7 +20,7 @@ impl Engine {
 	pub fn create_window(&mut self, props: WindowProps) {
 		let win = crate::imp::gl::Window::new(props.title, props.size);
 
-		self.window = Some(Box::new(win));
+		self.window = Some(box win);
 	}
 	pub fn update(&mut self) {
 		if let Some(window) = &mut self.window {

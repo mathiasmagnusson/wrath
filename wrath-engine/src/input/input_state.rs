@@ -1,12 +1,23 @@
 use super::Button;
 
 pub struct InputState {
-	mouse_position: (u32, u32),
-	buttons: Button,
+	pub mouse_position: (u32, u32),
+	pub buttons: Button,
 }
 
 impl InputState {
-	fn is_pressed(&self, button: Button) -> bool {
-		self.buttons & button > 0
+	const fn new() -> Self {
+		Self {
+			mouse_position: (0, 0),
+			buttons: 0,
+		}
+	}
+	pub fn mouse_position() -> (u32, u32) {
+		unsafe { INPUT_STATE.mouse_position }
+	}
+	pub fn is_pressed(button: Button) -> bool {
+		unsafe { INPUT_STATE.buttons & button > 0 }
 	}
 }
+
+static mut INPUT_STATE: InputState = InputState::new();

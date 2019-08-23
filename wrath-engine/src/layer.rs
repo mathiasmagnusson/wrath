@@ -2,6 +2,7 @@ use std::collections::VecDeque;
 use std::ops::AddAssign;
 use std::time::Duration;
 
+use crate::Button;
 use crate::Event;
 
 pub struct LayerStack {
@@ -70,4 +71,6 @@ pub trait Layer {
 	fn on_render(&mut self) {}
 	fn on_window_close_requested(&mut self) {}
 	fn on_window_resize(&mut self, size: (u32, u32)) {}
+	fn on_key_pressed(&mut self, button: Button, repeat: bool) -> bool { false }
+	fn on_key_released(&mut self, button: Button) -> bool { false }
 }
