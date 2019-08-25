@@ -1,5 +1,7 @@
 #![feature(box_syntax)]
 
+use std::time::Duration;
+
 use wrath::Button;
 use wrath::CallbackHandler;
 use wrath::Engine;
@@ -44,6 +46,9 @@ impl ExampleLayer {
 }
 
 impl Layer for ExampleLayer {
+	fn on_update(&mut self, dt: Duration) {
+		// println!("dt: {}", dt.as_secs_f64());
+	}
 	fn on_window_resize(&mut self, size: (u32, u32)) {
 		println!("Window resized: ({}, {})", size.0, size.1);
 	}

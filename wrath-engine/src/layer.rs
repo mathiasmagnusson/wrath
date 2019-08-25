@@ -26,6 +26,11 @@ impl LayerStack {
 			}
 		}
 	}
+	pub fn call_update(&mut self, dt: Duration) {
+		for layer in self.inner.iter_mut() {
+			layer.0.on_update(dt);
+		}
+	}
 	pub fn push_back(&mut self, layer: Box<dyn Layer>) -> LayerHandle {
 		let handle = self.handle_counter;
 		self.handle_counter += 1;

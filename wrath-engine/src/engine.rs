@@ -1,3 +1,6 @@
+use std::time::Instant;
+use std::time::Duration;
+
 use crate::events::EventType;
 use crate::input::INPUT_STATE;
 use crate::Button;
@@ -10,6 +13,7 @@ pub struct Engine {
 	window: Option<Box<dyn Window>>,
 	is_running: bool,
 	layer_stack: LayerStack,
+	last_update: Instant,
 }
 
 impl Engine {
@@ -21,6 +25,7 @@ impl Engine {
 			window: None,
 			is_running: true,
 			layer_stack,
+			last_update: Instant::now(),
 		}
 	}
 	pub fn create_window(&mut self, props: WindowProps) {
@@ -29,14 +34,20 @@ impl Engine {
 		self.window = Some(box win);
 	}
 	pub fn update(&mut self) {
+		let now = Instant::now();
+		let dt = now - self.last_update;
+		self.last_update = now;
+		
 		if let Some(window) = &mut self.window {
 			for event in window.update() {
 				if event.event_type() == EventType::WindowCloseRequested {
 					self.is_running = false;
 				}
-				self.layer_stack.submit(event);
+				self.layer_stack().submit(event);
 			}
 		}
+
+		self.layer_stack().call_update(dt);
 	}
 	pub fn is_running(&self) -> bool {
 		self.is_running
