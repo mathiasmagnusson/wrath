@@ -13,7 +13,7 @@ struct Application {
 
 impl Application {
 	fn new() -> Self {
-		Application {
+		Self {
 			ex_layer: LayerHandle::none(),
 		}
 	}
@@ -35,11 +35,11 @@ impl CallbackHandler for Application {
 	}
 }
 
-struct ExampleLayer { }
+struct ExampleLayer;
 
 impl ExampleLayer {
 	pub fn new() -> Self {
-		Self { }
+		Self
 	}
 }
 
