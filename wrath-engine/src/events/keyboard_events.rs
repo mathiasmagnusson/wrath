@@ -1,6 +1,6 @@
+use crate::Button;
 use super::Event;
 use super::EventType;
-use crate::Button;
 use crate::Layer;
 
 pub struct KeyPressedEvent {

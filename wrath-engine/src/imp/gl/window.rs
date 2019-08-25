@@ -1,12 +1,4 @@
-use crate::events::KeyPressedEvent;
-use crate::events::KeyReleasedEvent;
-use crate::events::MouseDownEvent;
-use crate::events::MouseMoveEvent;
-use crate::events::MouseScrolledEvent;
-use crate::events::MouseUpEvent;
-use crate::events::TextWrittenEvent;
-use crate::events::WindowCloseRequestedEvent;
-use crate::events::WindowResizedEvent;
+use crate::events::*;
 use crate::input::get_mouse_position;
 use crate::Button;
 use crate::Event;

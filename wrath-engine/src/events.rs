@@ -24,5 +24,5 @@ pub enum EventType {
 	MouseDown,
 	MouseUp,
 	MouseMove,
-	MouseScrolled
+	MouseScrolled,
 }

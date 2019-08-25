@@ -233,7 +233,5 @@ pub struct InputState {
 }
 
 pub fn get_mouse_position() -> (u32, u32) {
-	unsafe {
-		INPUT_STATE.mouse_position
-	}
+	unsafe { INPUT_STATE.mouse_position }
 }

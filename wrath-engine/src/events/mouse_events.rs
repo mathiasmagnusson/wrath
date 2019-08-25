@@ -1,8 +1,8 @@
+use crate::Button;
 use super::Event;
 use super::EventType;
-use crate::Button;
-use crate::Layer;
 use crate::Float;
+use crate::Layer;
 
 pub struct MouseDownEvent {
 	is_handled: bool,
