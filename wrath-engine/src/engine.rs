@@ -1,5 +1,4 @@
 use std::time::Instant;
-use std::time::Duration;
 
 use crate::events::EventType;
 use crate::input::INPUT_STATE;
@@ -37,7 +36,7 @@ impl Engine {
 		let now = Instant::now();
 		let dt = now - self.last_update;
 		self.last_update = now;
-		
+
 		if let Some(window) = &mut self.window {
 			for event in window.update() {
 				if event.event_type() == EventType::WindowCloseRequested {

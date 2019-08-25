@@ -46,7 +46,7 @@ impl ExampleLayer {
 }
 
 impl Layer for ExampleLayer {
-	fn on_update(&mut self, dt: Duration) {
+	fn on_update(&mut self, _dt: Duration) {
 		// println!("dt: {}", dt.as_secs_f64());
 	}
 	fn on_window_resize(&mut self, size: (u32, u32)) {
