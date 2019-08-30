@@ -1,8 +1,9 @@
 use crate::CallbackHandler;
 use crate::Engine;
+use crate::EngineProps;
 
-pub fn init<T: CallbackHandler>(mut handler: T) {
-	let mut engine = Engine::new();
+pub fn init<T: CallbackHandler>(mut handler: T, engine_props: EngineProps) {
+	let mut engine = Engine::new(engine_props);
 	handler.on_create(&mut engine);
 
 	while engine.is_running() {

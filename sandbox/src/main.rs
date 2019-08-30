@@ -5,9 +5,11 @@ use std::time::Duration;
 use wrath::Button;
 use wrath::CallbackHandler;
 use wrath::Engine;
+use wrath::EngineProps;
+use wrath::Float;
 use wrath::Layer;
 use wrath::LayerHandle;
-use wrath::Float;
+use wrath::WindowProps;
 
 struct Application {
 	ex_layer: LayerHandle,
@@ -23,10 +25,6 @@ impl Application {
 
 impl CallbackHandler for Application {
 	fn on_create(&mut self, engine: &mut Engine) {
-		engine.create_window(wrath::WindowProps {
-			title: "Wrath Engine Sandbox".into(),
-			size: (1080, 720),
-		});
 		self.ex_layer = engine.layer_stack().push_front(box ExampleLayer::new());
 	}
 	fn on_update(&mut self, _engine: &mut Engine) {
@@ -73,5 +71,10 @@ impl Layer for ExampleLayer {
 }
 
 fn main() {
-	wrath::init(Application::new());
+	wrath::init(Application::new(), EngineProps {
+		window_props: WindowProps {
+			title: "Wrath Engine Sandbox".into(),
+			size: (1080, 720),
+		}
+	});
 }

@@ -12,3 +12,7 @@ pub struct WindowProps {
 	pub title: String,
 	pub size: (u32, u32),
 }
+
+pub fn create(props: WindowProps) -> Box<dyn Window> {
+	box crate::imp::gl::Window::new(props)
+}

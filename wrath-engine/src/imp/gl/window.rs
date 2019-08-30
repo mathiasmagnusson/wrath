@@ -3,6 +3,7 @@ use crate::input::get_mouse_position;
 use crate::Button;
 use crate::Event;
 use crate::Float;
+use crate::WindowProps;
 
 pub struct Window {
 	inner: glutin::Window,
@@ -12,16 +13,16 @@ pub struct Window {
 }
 
 impl Window {
-	pub fn new(title: String, size: (u32, u32)) -> Self {
+	pub fn new(props: WindowProps) -> Self {
 		let el = glutin::EventsLoop::new();
 		let win = glutin::Window::new(&el).unwrap();
-		win.set_inner_size(glutin::dpi::LogicalSize::from(size));
-		win.set_title(&title);
+		win.set_inner_size(glutin::dpi::LogicalSize::from(props.size));
+		win.set_title(&props.title);
 
 		Self {
 			inner: win,
 			evt_loop: el,
-			title,
+			title: props.title,
 			close_requested: false,
 		}
 	}

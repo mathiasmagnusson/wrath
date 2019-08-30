@@ -17,6 +17,7 @@ pub mod input;
 
 pub use callback_handler::CallbackHandler;
 pub use engine::Engine;
+pub use engine::EngineProps;
 pub use events::Event;
 pub use init::init;
 pub use input::Button;
