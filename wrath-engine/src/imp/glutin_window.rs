@@ -5,14 +5,14 @@ use crate::Event;
 use crate::Float;
 use crate::WindowProps;
 
-pub struct Window {
+pub struct GlutinWindow {
 	inner: glutin::Window,
 	evt_loop: glutin::EventsLoop,
 	title: String,
 	close_requested: bool,
 }
 
-impl Window {
+impl GlutinWindow {
 	pub fn new(props: WindowProps) -> Self {
 		let el = glutin::EventsLoop::new();
 		let win = glutin::Window::new(&el).unwrap();
@@ -28,7 +28,7 @@ impl Window {
 	}
 }
 
-impl crate::Window for Window {
+impl crate::Window for GlutinWindow {
 	fn set_title(&mut self, title: String) {
 		self.title = title;
 	}

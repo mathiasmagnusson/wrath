@@ -11,6 +11,7 @@ mod events;
 mod imp;
 mod init;
 mod layer;
+mod renderer;
 mod window;
 
 pub mod input;
@@ -25,6 +26,8 @@ pub use input::InputState;
 pub use layer::Layer;
 pub use layer::LayerHandle;
 pub use layer::LayerStack;
+pub use renderer::Renderer;
+pub use renderer::RendererImpl;
 pub use window::Window;
 pub use window::WindowProps;
 

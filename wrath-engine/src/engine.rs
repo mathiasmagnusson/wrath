@@ -5,6 +5,7 @@ use crate::input::INPUT_STATE;
 use crate::Button;
 use crate::Layer;
 use crate::LayerStack;
+use crate::Renderer;
 use crate::window;
 use crate::Window;
 use crate::WindowProps;
@@ -14,18 +15,21 @@ pub struct Engine {
 	is_running: bool,
 	layer_stack: LayerStack,
 	last_update: Instant,
+	renderer: Renderer,
 }
 
 impl Engine {
 	pub fn new(props: EngineProps) -> Self {
 		let mut layer_stack = LayerStack::new();
 		layer_stack.push_back(box InputPollingUpdateLayer);
+		let window = window::create(props.window_props);
 
 		Self {
-			window: window::create(props.window_props),
+			window,
 			is_running: true,
 			layer_stack,
 			last_update: Instant::now(),
+			renderer: Renderer::new(),
 		}
 	}
 	pub fn update(&mut self) {
