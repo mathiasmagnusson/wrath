@@ -73,7 +73,7 @@ impl Layer for ExampleLayer {
 fn main() {
 	wrath::init(Application::new(), EngineProps {
 		window_props: WindowProps {
-			title: "Wrath Engine Sandbox".into(),
+			title: "Curl the Crankshaft".into(),
 			size: (1080, 720),
 		}
 	});
