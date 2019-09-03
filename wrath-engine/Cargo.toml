@@ -13,3 +13,4 @@ big-floats = []
 
 [dependencies]
 glutin = "0.21.0"
+x11 = { version = "2.18.1", features = ["xlib"] }

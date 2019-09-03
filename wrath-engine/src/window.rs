@@ -14,5 +14,5 @@ pub struct WindowProps {
 }
 
 pub fn create(props: WindowProps) -> Box<dyn Window> {
-	box crate::imp::glutin_window::GlutinWindow::new(props)
+	box crate::imp::x11_window::X11Window::new(props)
 }
