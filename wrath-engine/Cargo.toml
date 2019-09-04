@@ -12,5 +12,5 @@ default = []
 big-floats = []
 
 [dependencies]
-glutin = "0.21.0"
-x11 = { version = "2.18.1", features = ["xlib"] }
+glfw = "0.32.0"
+gl = "0.13.0"

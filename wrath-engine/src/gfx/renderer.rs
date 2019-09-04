@@ -11,7 +11,7 @@ impl Renderer {
 }
 
 pub trait RendererImpl {
-	fn set_clear_color(&mut self, r: u8, g: u8, b: u8);
 	fn clear(&mut self);
+	fn set_clear_color(&mut self, r: u8, g: u8, b: u8);
 	fn render(&mut self, /* stuff to render */);
 }

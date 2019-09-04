@@ -8,10 +8,10 @@ pub type Float = f32;
 mod callback_handler;
 mod engine;
 mod events;
+mod gfx;
 mod imp;
 mod init;
 mod layer;
-mod renderer;
 mod window;
 
 pub mod input;
@@ -26,8 +26,8 @@ pub use input::InputState;
 pub use layer::Layer;
 pub use layer::LayerHandle;
 pub use layer::LayerStack;
-pub use renderer::Renderer;
-pub use renderer::RendererImpl;
+pub use gfx::Renderer;
+pub use gfx::RendererImpl;
 pub use window::Window;
 pub use window::WindowProps;
 

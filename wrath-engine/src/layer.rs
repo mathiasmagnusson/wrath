@@ -5,6 +5,7 @@ use std::time::Duration;
 use crate::Button;
 use crate::Event;
 use crate::Float;
+use crate::Renderer;
 
 pub struct LayerStack {
 	inner: VecDeque<(Box<dyn Layer>, LayerHandle)>,
@@ -29,6 +30,11 @@ impl LayerStack {
 	pub fn call_update(&mut self, dt: Duration) {
 		for layer in self.inner.iter_mut() {
 			layer.0.on_update(dt);
+		}
+	}
+	pub fn call_render(&mut self, renderer: &mut Renderer) {
+		for layer in self.inner.iter_mut() {
+			layer.0.on_render(renderer);
 		}
 	}
 	pub fn push_back(&mut self, layer: Box<dyn Layer>) -> LayerHandle {
@@ -74,7 +80,7 @@ pub trait Layer {
 	fn on_attach(&mut self) {}
 	fn on_detach(&mut self) {}
 	fn on_update(&mut self, dt: Duration) {}
-	fn on_render(&mut self) {}
+	fn on_render(&mut self, renderer: &mut Renderer) {}
 	fn on_window_close_requested(&mut self) {}
 	fn on_window_resize(&mut self, size: (u32, u32)) {}
 	fn on_key_press(&mut self, button: Button, repeat: bool) -> bool { false }

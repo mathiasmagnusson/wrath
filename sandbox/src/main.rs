@@ -10,6 +10,7 @@ use wrath::Float;
 use wrath::Layer;
 use wrath::LayerHandle;
 use wrath::WindowProps;
+use wrath::Renderer;
 
 struct Application {
 	ex_layer: LayerHandle,
@@ -47,6 +48,9 @@ impl Layer for ExampleLayer {
 	fn on_update(&mut self, _dt: Duration) {
 		// println!("dt: {}", dt.as_secs_f64());
 	}
+	fn on_render(&mut self, _renderer: &mut Renderer) {
+
+	}
 	fn on_window_resize(&mut self, size: (u32, u32)) {
 		println!("Window resized: ({}, {})", size.0, size.1);
 	}
@@ -54,6 +58,18 @@ impl Layer for ExampleLayer {
 		print!("{}", which);
 		use std::io::Write;
 		let _ = std::io::stdout().flush();
+		false
+	}
+	fn on_key_press(&mut self, button: Button, repeat: bool) -> bool {
+		println!("Key pressed: {:?} {}", button, if repeat { "again" } else { "" });
+		false
+	}
+	fn on_key_release(&mut self, button: Button) -> bool {
+		println!("Key released: {:?}", button);
+		false
+	}
+	fn on_mouse_move(&mut self, position: (u32, u32), delta: (i32, i32)) -> bool {
+		println!("Mouse moved to ({}, {}), Δ ({}, {})", position.0, position.1, delta.0, delta.1);
 		false
 	}
 	fn on_mouse_down(&mut self, button: Button) -> bool {

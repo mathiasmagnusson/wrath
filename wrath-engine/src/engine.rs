@@ -1,6 +1,5 @@
 use std::time::Instant;
 
-use crate::events::EventType;
 use crate::input::INPUT_STATE;
 use crate::Button;
 use crate::Layer;
@@ -38,13 +37,14 @@ impl Engine {
 		self.last_update = now;
 
 		for event in self.window.update() {
-			if event.event_type() == EventType::WindowCloseRequested {
+			if self.window.close_requested() {
 				self.is_running = false;
 			}
-			self.layer_stack().submit(event);
+			self.layer_stack.submit(event);
 		}
 
-		self.layer_stack().call_update(dt);
+		self.layer_stack.call_update(dt);
+		// self.layer_stack.call_render(&mut self.renderer);
 	}
 	pub fn is_running(&self) -> bool {
 		self.is_running
@@ -54,6 +54,9 @@ impl Engine {
 	}
 	pub fn layer_stack(&mut self) -> &mut LayerStack {
 		&mut self.layer_stack
+	}
+	pub fn renderer(&mut self) -> &mut Renderer {
+		&mut self.renderer
 	}
 }
 
@@ -94,7 +97,7 @@ impl Layer for InputPollingUpdateLayer {
 				Tab => INPUT_STATE.tab = true,
 				CapsLock => INPUT_STATE.caps_lock = true,
 				Backspace => INPUT_STATE.backspace = true,
-				Esc => INPUT_STATE.esc = true,
+				Escape => INPUT_STATE.escape = true,
 				F1 => INPUT_STATE.f1 = true,
 				F2 => INPUT_STATE.f2 = true,
 				F3 => INPUT_STATE.f3 = true,
@@ -216,7 +219,7 @@ impl Layer for InputPollingUpdateLayer {
 				Tab => INPUT_STATE.tab = false,
 				CapsLock => INPUT_STATE.caps_lock = false,
 				Backspace => INPUT_STATE.backspace = false,
-				Esc => INPUT_STATE.esc = false,
+				Escape => INPUT_STATE.escape = false,
 				F1 => INPUT_STATE.f1 = false,
 				F2 => INPUT_STATE.f2 = false,
 				F3 => INPUT_STATE.f3 = false,

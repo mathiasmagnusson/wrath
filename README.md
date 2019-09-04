@@ -1,3 +1,6 @@
-Linux x11 support only ATM
-
-Requires `libx11-dev` to compile
+Required packages to build (Pop!_OS)
+	cmake
+	libxrandr-dev
+	libxinerama-dev
+	libxcursor-dev
+	libxi-dev

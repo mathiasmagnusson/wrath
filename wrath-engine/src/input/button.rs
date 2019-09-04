@@ -22,7 +22,7 @@ pub enum Button {
 	Tab,
 	CapsLock,
 	Backspace,
-	Esc,
+	Escape,
 	F1,
 	F2,
 	F3,
@@ -98,7 +98,7 @@ pub enum Button {
 	Comma,
 	Period,
 	Slash,
-	// Button to the right of left shift on some kbd layouts
+	// TODO: Add button to the right of left shift on some kbd layouts
 	NumPad0,
 	NumPad1,
 	NumPad2,
@@ -144,7 +144,7 @@ impl Button {
 				Tab => INPUT_STATE.tab,
 				CapsLock => INPUT_STATE.caps_lock,
 				Backspace => INPUT_STATE.backspace,
-				Esc => INPUT_STATE.esc,
+				Escape => INPUT_STATE.escape,
 				F1 => INPUT_STATE.f1,
 				F2 => INPUT_STATE.f2,
 				F3 => INPUT_STATE.f3,
