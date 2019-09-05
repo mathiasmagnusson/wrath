@@ -38,13 +38,17 @@ impl LayerStack {
 			layer.0.on_render(renderer);
 		}
 	}
-	pub fn push_back(&mut self, layer: Box<dyn Layer>) -> LayerHandle {
+	pub fn push_back(&mut self, mut layer: Box<dyn Layer>) -> LayerHandle {
+		layer.on_attach();
+
 		let handle = self.handle_counter;
 		self.handle_counter += 1;
 		self.inner.push_back((layer, handle));
 		handle
 	}
-	pub fn push_front(&mut self, layer: Box<dyn Layer>) -> LayerHandle {
+	pub fn push_front(&mut self, mut layer: Box<dyn Layer>) -> LayerHandle {
+		layer.on_attach();
+
 		let handle = self.handle_counter;
 		self.handle_counter += 1;
 		self.inner.push_front((layer, handle));
@@ -53,7 +57,9 @@ impl LayerStack {
 	pub fn remove_layer(&mut self, handle: LayerHandle) -> bool {
 		for i in 0..self.inner.len() {
 			if self.inner[i].1 == handle {
-				self.inner.remove(i);
+				if let Some((mut layer, _handle)) = self.inner.remove(i) {
+					layer.on_detach();
+				}
 				return true;
 			}
 		}

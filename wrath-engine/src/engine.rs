@@ -46,7 +46,7 @@ impl Engine {
 		self.layer_stack.call_update(dt);
 
 		self.renderer.clear();
-		// self.layer_stack.call_render(&mut self.renderer);
+		self.layer_stack.call_render(&mut self.renderer);
 		self.window.swap_buffers();
 	}
 	pub fn is_running(&self) -> bool {

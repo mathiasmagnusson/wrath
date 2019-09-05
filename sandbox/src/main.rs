@@ -30,27 +30,164 @@ impl CallbackHandler for Application {
 		self.ex_layer = engine.layer_stack().push_front(box ExampleLayer::new());
 	}
 	fn on_update(&mut self, _engine: &mut Engine) {
-		
+		// do shit
 	}
 	fn on_exit(&mut self, engine: &mut Engine) {
 		engine.layer_stack().remove_layer(self.ex_layer);
 	}
 }
 
-struct ExampleLayer;
+struct ExampleLayer {
+	vertices: Vec<Float>,
+	indices: Vec<usize>,
+	v_shad_src: &'static str,
+	f_shad_src: &'static str,
+	va: u32,
+	vb: u32,
+	ib: u32,
+	sp: u32,
+}
 
 impl ExampleLayer {
 	pub fn new() -> Self {
-		Self
+		Self {
+			vertices: vec![
+				-0.5, -0.5, 0.0,
+				 0.5, -0.5, 0.0,
+				 0.0,  0.5, 0.0,
+			],
+			indices: vec![
+				0, 1, 2,
+			],
+			v_shad_src: r##"
+				#version 330 core
+			
+				layout(location = 0) in vec3 a_Position;
+				out vec3 v_Position;
+				void main()
+				{
+					v_Position = a_Position;
+					gl_Position = vec4(a_Position, 1.0);	
+				}
+			"##,
+			f_shad_src: r##"
+				#version 330 core
+			
+				layout(location = 0) out vec4 color;
+				in vec3 v_Position;
+				void main()
+				{
+					color = vec4(v_Position * 0.5 + 0.5, 1.0);
+				}
+			"##,
+			va: 0,
+			vb: 0,
+			ib: 0,
+			sp: 0,
+		}
 	}
 }
 
 impl Layer for ExampleLayer {
+	fn on_attach(&mut self) {
+		unsafe {
+			use wrath::gl;
+			use std::mem::size_of;
+			use std::ffi::c_void;
+
+			gl::CreateVertexArrays(1, &mut self.va);
+			gl::BindVertexArray(self.va);
+
+			gl::CreateBuffers(1, &mut self.vb);
+			gl::BindBuffer(gl::ARRAY_BUFFER, self.vb);
+
+			gl::BufferData(
+				gl::ARRAY_BUFFER,
+				(size_of::<Float>() * self.vertices.len()) as isize,
+				self.vertices.as_ptr() as *const c_void,
+				gl::STATIC_DRAW
+			);
+
+			gl::EnableVertexAttribArray(0);
+			gl::VertexAttribPointer(0, 3, gl::FLOAT, gl::FALSE, (size_of::<Float>() * 3) as i32, std::ptr::null_mut());
+
+			gl::CreateBuffers(1, &mut self.ib);
+			gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, self.ib);
+
+			gl::BufferData(
+				gl::ELEMENT_ARRAY_BUFFER,
+				(size_of::<usize>() * self.indices.len()) as isize,
+				self.indices.as_ptr() as *const c_void,
+				gl::STATIC_DRAW,
+			);
+
+			let vs = gl::CreateShader(gl::VERTEX_SHADER);
+			let ptr = self.v_shad_src.as_ptr() as *const i8;
+			let len = self.v_shad_src.len() as i32;
+			gl::ShaderSource(vs, 1, &ptr, &len);
+
+			gl::CompileShader(vs);
+
+			let mut success = 0;
+			gl::GetShaderiv(vs, gl::COMPILE_STATUS, &mut success);
+			assert_eq!(success, 1, "Vertex Shader Compilation Failiure");
+
+			let fs = gl::CreateShader(gl::FRAGMENT_SHADER);
+			let ptr = self.f_shad_src.as_ptr() as *const i8;
+			let len = self.f_shad_src.len() as i32;
+			gl::ShaderSource(fs, 1, &ptr, &len);
+
+			gl::CompileShader(fs);
+
+			let mut success = 0;
+			gl::GetShaderiv(fs, gl::COMPILE_STATUS, &mut success);
+			assert_eq!(success, 1, "Fragment Shader Compilation Failiure");
+
+			self.sp = gl::CreateProgram();
+
+			let mut success = 0;
+			gl::GetProgramiv(self.sp, gl::LINK_STATUS, &mut success);
+			if success == 0 {
+				println!("\x1b[31mShader Program Linking Failiure:\x1b[0m");
+
+				let mut len = 0;
+				gl::GetProgramiv(self.sp, gl::INFO_LOG_LENGTH, &mut len);
+
+				let mut log = Vec::<u8>::with_capacity(len as usize);
+				gl::GetProgramInfoLog(self.sp, len, &mut len, log.as_mut_ptr() as *mut i8);
+
+				let log = String::from_utf8_lossy(&log);
+
+				println!("{}", log);
+				panic!();
+			}
+
+			gl::DetachShader(self.sp, vs);
+			gl::DetachShader(self.sp, fs);
+
+			gl::UseProgram(self.sp);
+		}
+
+		println!("va: {} vb: {} ib: {} sp: {}", self.va, self.vb, self.ib, self.sp);
+	}
 	fn on_update(&mut self, _dt: Duration) {
 		// println!("dt: {}", dt.as_secs_f64());
 	}
 	fn on_render(&mut self, _renderer: &mut Renderer) {
+		unsafe {
+			use wrath::gl;
 
+			gl::DrawElements(gl::TRIANGLES, 6, self.indices.len() as _, std::ptr::null());
+		}
+	}
+	fn on_detach(&mut self) {
+		unsafe {
+			use wrath::gl;
+
+			gl::DeleteVertexArrays(1, &self.va);
+			gl::DeleteBuffers(1, &self.vb);
+			gl::DeleteProgram(self.sp);
+		}
 	}
 	fn on_window_resize(&mut self, size: (u32, u32)) {
 		println!("Window resized: ({}, {})", size.0, size.1);

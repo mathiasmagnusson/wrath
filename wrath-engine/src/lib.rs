@@ -26,6 +26,8 @@ pub use gfx::PlatformRenderer;
 pub use window::Window;
 pub use window::WindowProps;
 
+pub use gl;
+
 #[cfg(test)]
 mod tests {
 	#[test]
