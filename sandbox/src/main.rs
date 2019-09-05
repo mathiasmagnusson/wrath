@@ -55,9 +55,7 @@ impl Layer for ExampleLayer {
 		println!("Window resized: ({}, {})", size.0, size.1);
 	}
 	fn on_text_written(&mut self, which: char) -> bool {
-		print!("{}", which);
-		use std::io::Write;
-		let _ = std::io::stdout().flush();
+		println!("{}", which);
 		false
 	}
 	fn on_key_press(&mut self, button: Button, repeat: bool) -> bool {
@@ -68,10 +66,10 @@ impl Layer for ExampleLayer {
 		println!("Key released: {:?}", button);
 		false
 	}
-	fn on_mouse_move(&mut self, position: (u32, u32), delta: (i32, i32)) -> bool {
-		println!("Mouse moved to ({}, {}), Δ ({}, {})", position.0, position.1, delta.0, delta.1);
-		false
-	}
+	// fn on_mouse_move(&mut self, position: (u32, u32), delta: (i32, i32)) -> bool {
+	// 	println!("Mouse moved to ({}, {}), Δ ({}, {})", position.0, position.1, delta.0, delta.1);
+	// 	false
+	// }
 	fn on_mouse_down(&mut self, button: Button) -> bool {
 		println!("Click {:?}!", button);
 		false

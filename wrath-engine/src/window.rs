@@ -5,6 +5,7 @@ pub trait Window {
 	fn get_title(&self) -> &str;
 	fn get_size(&self) -> (u32, u32);
 	fn update(&mut self) -> Vec<Box<dyn Event>>;
+	fn swap_buffers(&mut self);
 	fn close_requested(&self) -> bool;
 }
 
