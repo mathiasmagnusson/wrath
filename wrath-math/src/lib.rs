@@ -3,10 +3,120 @@ pub type Float = f64;
 #[cfg(not(feature = "big-floats"))]
 pub type Float = f32;
 
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub struct Vec3(Float, Float, Float);
+
+impl Vec3 {
+	pub fn x(&self) -> Float {
+		self.0
+	}
+	pub fn y(&self) -> Float {
+		self.1
+	}
+	pub fn z(&self) -> Float {
+		self.2
+	}
+	pub fn r(&self) -> Float {
+		self.0
+	}
+	pub fn g(&self) -> Float {
+		self.1
+	}
+	pub fn b(&self) -> Float {
+		self.2
+	}
+	pub fn mag_sq(&self) -> Float {
+		self.0 * self.0 + self.1 * self.1 + self.2 * self.2
+	}
+	pub fn mag(&self) -> Float {
+		self.mag_sq().sqrt()
+	}
+	pub fn normalized(&self) -> Vec3 {
+		let mag = self.mag();
+		Vec3 {
+			0: self.0 / mag,
+			1: self.1 / mag,
+			2: self.2 / mag,
+		}
+	}
+	pub fn normalize(&mut self) {
+		let mag = self.mag();
+		self.0 /= mag;
+		self.1 /= mag;
+		self.2 /= mag;
+	}
+}
+
+impl From<(Float, Float, Float)> for Vec3 {
+	fn from(v: (Float, Float, Float)) -> Vec3 {
+		Vec3(v.0, v.1, v.2)
+	}
+}
+
+impl std::ops::Add for Vec3 {
+	type Output = Self;
+	fn add(self, other: Self) -> Self::Output {
+		Self(self.0 + other.0, self.1 + other.1, self.2 + other.2)
+	}
+}
+
+impl std::ops::Sub for Vec3 {
+	type Output = Self;
+	fn sub(self, other: Self) -> Self::Output {
+		Self(self.0 - other.0, self.1 - other.1, self.2 - other.2)
+	}
+}
+
+impl std::ops::Mul<Float> for Vec3 {
+	type Output = Self;
+	fn mul(self, scalar: Float) -> Self::Output {
+		Self(self.0 * scalar, self.1 * scalar, self.2 * scalar)
+	}
+}
+
+impl std::ops::Div<Float> for Vec3 {
+	type Output = Self;
+	fn div(self, scalar: Float) -> Self::Output {
+		Self(self.0 / scalar, self.1 / scalar, self.2 / scalar)
+	}
+}
+
+impl std::ops::AddAssign for Vec3 {
+	fn add_assign(&mut self, other: Self) {
+		self.0 += other.0;
+		self.1 += other.1;
+		self.2 += other.2;
+	}
+}
+
+impl std::ops::SubAssign for Vec3 {
+	fn sub_assign(&mut self, other: Self) {
+		self.0 -= other.0;
+		self.1 -= other.1;
+		self.2 -= other.2;
+	}
+}
+
+impl std::ops::MulAssign<Float> for Vec3 {
+	fn mul_assign(&mut self, scalar: Float) {
+		self.0 *= scalar;
+		self.1 *= scalar;
+		self.2 *= scalar;
+	}
+}
+
+impl std::ops::DivAssign<Float> for Vec3 {
+	fn div_assign(&mut self, scalar: Float) {
+		self.0 /= scalar;
+		self.1 /= scalar;
+		self.2 /= scalar;
+	}
+}
+
 #[cfg(test)]
 mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
+	#[test]
+	fn it_works() {
+		assert_eq!(2 + 2, 4);
+	}
 }
