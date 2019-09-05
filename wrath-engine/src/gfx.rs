@@ -1,4 +1,4 @@
 mod renderer;
 
 pub use renderer::Renderer;
-pub use renderer::RendererImpl;
+pub use renderer::PlatformRenderer;

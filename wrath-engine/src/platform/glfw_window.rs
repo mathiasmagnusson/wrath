@@ -35,6 +35,9 @@ impl GLFWWindow {
 			props.size.0, props.size.1, &props.title, glfw::WindowMode::Windowed
 		).unwrap();
 
+		// TODO: OpenGL specific code should not be here
+		gl::load_with(|s| window.get_proc_address(s));
+
 		window.set_close_polling(true);
 		window.set_size_polling(true);
 		window.set_key_polling(true);
@@ -64,6 +67,10 @@ impl Window for GLFWWindow {
 		let (w, h) = self.inner.get_size();
 		(w as _, h as _)
 	}
+	fn swap_buffers(&mut self) {
+		use glfw::Context;
+		self.inner.swap_buffers();
+	}
 	fn update(&mut self) -> Vec<Box<dyn Event>> {
 		let mut events: Vec<Box<dyn Event>> = vec![];
 
@@ -79,7 +86,7 @@ impl Window for GLFWWindow {
 					events.push(WindowResizedEvent::boxed((w as _, h as _)));
 				}
 				glfw::WindowEvent::Key(key, _scancode, glfw::Action::Press, _modifiers) => {
-					events.push(KeyPressedEvent::boxed(convert_key_event(key), false/*maybe key.is_pressed()*/));
+					events.push(KeyPressedEvent::boxed(convert_key_event(key), false));
 				}
 				glfw::WindowEvent::Key(key, _scancode, glfw::Action::Repeat, _modifiers) => {
 					events.push(KeyPressedEvent::boxed(convert_key_event(key), true));

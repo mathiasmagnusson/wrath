@@ -1,5 +1,5 @@
 pub struct Renderer {
-	imp: Box<dyn RendererImpl>,
+	inner: Box<dyn PlatformRenderer>,
 }
 
 impl Renderer {

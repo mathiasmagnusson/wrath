@@ -9,7 +9,7 @@ mod callback_handler;
 mod engine;
 mod events;
 mod gfx;
-mod imp;
+mod platform;
 mod init;
 mod layer;
 mod window;
@@ -27,7 +27,7 @@ pub use layer::Layer;
 pub use layer::LayerHandle;
 pub use layer::LayerStack;
 pub use gfx::Renderer;
-pub use gfx::RendererImpl;
+pub use gfx::PlatformRenderer;
 pub use window::Window;
 pub use window::WindowProps;
 
