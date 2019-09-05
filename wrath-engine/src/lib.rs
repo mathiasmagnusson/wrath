@@ -1,10 +1,5 @@
 #![feature(box_syntax)]
 
-#[cfg(feature = "big-floats")]
-pub type Float = f64;
-#[cfg(not(feature = "big-floats"))]
-pub type Float = f32;
-
 mod callback_handler;
 mod engine;
 mod events;

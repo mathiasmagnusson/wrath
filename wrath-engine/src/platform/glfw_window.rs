@@ -2,11 +2,12 @@ use crate::events::*;
 use crate::input::get_mouse_position;
 use crate::Button;
 use crate::Event;
-use crate::Float;
 use crate::Window;
 use crate::WindowProps;
 
 use std::sync::Once;
+
+use wrath_math::Float;
 
 type GlfwEventLoop = std::sync::mpsc::Receiver<(f64, glfw::WindowEvent)>;
 static mut GLFW_HANDLE: Option<glfw::Glfw> = None;

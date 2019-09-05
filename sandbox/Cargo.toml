@@ -9,3 +9,4 @@ publish = false
 
 [dependencies]
 wrath = { path = "../wrath-engine" }
+wrath-math = { path = "../wrath-math" }

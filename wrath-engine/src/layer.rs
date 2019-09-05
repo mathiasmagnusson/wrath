@@ -1,11 +1,12 @@
+use crate::Button;
+use crate::Event;
+use crate::Renderer;
+
 use std::collections::VecDeque;
 use std::ops::AddAssign;
 use std::time::Duration;
 
-use crate::Button;
-use crate::Event;
-use crate::Float;
-use crate::Renderer;
+use wrath_math::Float;
 
 pub struct LayerStack {
 	inner: VecDeque<(Box<dyn Layer>, LayerHandle)>,

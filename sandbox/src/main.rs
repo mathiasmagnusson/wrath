@@ -1,16 +1,17 @@
 #![feature(box_syntax)]
 
-use std::time::Duration;
-
 use wrath::Button;
 use wrath::CallbackHandler;
 use wrath::Engine;
 use wrath::EngineProps;
-use wrath::Float;
 use wrath::Layer;
 use wrath::LayerHandle;
 use wrath::WindowProps;
 use wrath::Renderer;
+
+use std::time::Duration;
+
+use wrath_math::Float;
 
 struct Application {
 	ex_layer: LayerHandle,
