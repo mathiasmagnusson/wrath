@@ -62,22 +62,21 @@ impl ExampleLayer {
 			v_shad_src: r##"
 				#version 330 core
 			
-				layout(location = 0) in vec3 a_Position;
-				out vec3 v_Position;
+				layout(location = 0) in vec3 in_pos;
+
 				void main()
 				{
-					v_Position = a_Position;
-					gl_Position = vec4(a_Position, 1.0);	
+					gl_Position = vec4(in_pos, 1.0);
 				}
 			"##,
 			f_shad_src: r##"
 				#version 330 core
 			
 				layout(location = 0) out vec4 color;
-				in vec3 v_Position;
+
 				void main()
 				{
-					color = vec4(v_Position * 0.5 + 0.5, 1.0);
+					color = vec4(1.0, 1.0, 1.0, 1.0);
 				}
 			"##,
 			va: 0,
@@ -93,6 +92,7 @@ impl Layer for ExampleLayer {
 		unsafe {
 			use wrath::gl;
 			use std::mem::size_of;
+			use std::mem::size_of_val;
 			use std::ffi::c_void;
 
 			gl::CreateVertexArrays(1, &mut self.va);
@@ -103,7 +103,7 @@ impl Layer for ExampleLayer {
 
 			gl::BufferData(
 				gl::ARRAY_BUFFER,
-				(size_of::<Float>() * self.vertices.len()) as isize,
+				size_of_val(self.vertices.as_slice()) as isize,
 				self.vertices.as_ptr() as *const c_void,
 				gl::STATIC_DRAW
 			);
@@ -116,7 +116,7 @@ impl Layer for ExampleLayer {
 
 			gl::BufferData(
 				gl::ELEMENT_ARRAY_BUFFER,
-				(size_of::<usize>() * self.indices.len()) as isize,
+				size_of_val(self.indices.as_slice()) as isize,
 				self.indices.as_ptr() as *const c_void,
 				gl::STATIC_DRAW,
 			);
@@ -130,7 +130,20 @@ impl Layer for ExampleLayer {
 
 			let mut success = 0;
 			gl::GetShaderiv(vs, gl::COMPILE_STATUS, &mut success);
-			assert_eq!(success, 1, "Vertex Shader Compilation Failiure");
+			if success == 0 {
+				println!("\x1b[31mVertex Shader Compilation Failiure:\x1b[0m");
+
+				let mut len = 0;
+				gl::GetShaderiv(vs, gl::INFO_LOG_LENGTH, &mut len);
+
+				let mut log = vec![b'a'; len as usize - 1];
+				gl::GetShaderInfoLog(vs, len, &mut len, log.as_mut_ptr() as *mut i8);
+
+				let log = String::from_utf8_lossy(&log);
+
+				println!("{}", log);
+				panic!();
+			}
 
 			let fs = gl::CreateShader(gl::FRAGMENT_SHADER);
 			let ptr = self.f_shad_src.as_ptr() as *const i8;
@@ -141,9 +154,26 @@ impl Layer for ExampleLayer {
 
 			let mut success = 0;
 			gl::GetShaderiv(fs, gl::COMPILE_STATUS, &mut success);
-			assert_eq!(success, 1, "Fragment Shader Compilation Failiure");
+			if success == 0 {
+				println!("\x1b[31mFragment Shader Compilation Failiure:\x1b[0m");
+
+				let mut len = 0;
+				gl::GetShaderiv(fs, gl::INFO_LOG_LENGTH, &mut len);
+
+				let mut log = vec![b'a'; len as usize - 1];
+				gl::GetShaderInfoLog(fs, len, &mut len, log.as_mut_ptr() as *mut i8);
+
+				let log = String::from_utf8_lossy(&log);
+
+				println!("{}", log);
+				panic!();
+			}
 
 			self.sp = gl::CreateProgram();
+
+			gl::AttachShader(self.sp, vs);
+			gl::AttachShader(self.sp, fs);
+			gl::LinkProgram(self.sp);
 
 			let mut success = 0;
 			gl::GetProgramiv(self.sp, gl::LINK_STATUS, &mut success);
