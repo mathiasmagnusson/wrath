@@ -116,7 +116,9 @@ impl Layer for ExampleLayer {
 				gl::STATIC_DRAW,
 			);
 
-			self.shader = renderer.create_shader(std::path::Path::new("sandbox/assets/shaders/cool"));
+			self.shader = renderer.create_shader(
+				std::path::Path::new("sandbox/assets/shaders/cool")
+			);
 
 			renderer.bind_shader(self.shader);
 		}
