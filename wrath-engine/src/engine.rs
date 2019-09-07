@@ -70,7 +70,7 @@ impl Engine {
 		self.layer_stack.push_front(layer, self.renderer.as_mut())
 	}
 	pub fn remove_layer(&mut self, handle: LayerHandle) -> bool {
-		self.layer_stack.remove_layer(handle)
+		self.layer_stack.remove_layer(handle, self.renderer.as_mut())
 	}
 	pub fn renderer(&mut self) -> &mut dyn Renderer {
 		self.renderer.as_mut()

@@ -54,11 +54,11 @@ impl LayerStack {
 		self.inner.push_front((layer, handle));
 		handle
 	}
-	pub fn remove_layer(&mut self, handle: LayerHandle) -> bool {
+	pub fn remove_layer(&mut self, handle: LayerHandle, renderer: &mut dyn Renderer) -> bool {
 		for i in 0..self.inner.len() {
 			if self.inner[i].1 == handle {
 				if let Some((mut layer, _handle)) = self.inner.remove(i) {
-					layer.on_detach();
+					layer.on_detach(renderer);
 				}
 				return true;
 			}
@@ -85,7 +85,7 @@ impl AddAssign<u32> for LayerHandle {
 #[allow(unused_variables)]
 pub trait Layer {
 	fn on_attach(&mut self, renderer: &mut dyn Renderer) {}
-	fn on_detach(&mut self) {}
+	fn on_detach(&mut self, renderer: &mut dyn Renderer) {}
 	fn on_update(&mut self, dt: Duration) {}
 	fn on_render(&mut self, renderer: &mut dyn Renderer) {}
 	fn on_window_close_requested(&mut self) {}

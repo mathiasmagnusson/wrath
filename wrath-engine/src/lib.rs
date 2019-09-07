@@ -3,7 +3,7 @@
 mod callback_handler;
 mod engine;
 mod events;
-mod gfx;
+mod rendering;
 mod platform;
 mod init;
 mod layer;
@@ -21,7 +21,10 @@ pub use input::InputState;
 pub use layer::Layer;
 pub use layer::LayerHandle;
 pub use layer::LayerStack;
-pub use gfx::Renderer;
+pub use rendering::Renderer;
+pub use rendering::ShaderHandle;
+pub use rendering::ShaderUniform;
+pub use rendering::ShaderType;
 pub use window::Window;
 pub use window::WindowProps;
 
