@@ -15,17 +15,18 @@ pub struct Engine {
 	is_running: bool,
 	layer_stack: LayerStack,
 	last_update: Instant,
-	renderer: Renderer,
+	renderer: Box<dyn Renderer>,
 }
 
 impl Engine {
 	pub fn new(props: EngineProps) -> Self {
 		let window = window::create(props.window_props);
 
-		let mut renderer = Renderer::new();
-		
+		let mut renderer = box crate::platform::opengl_renderer::OpenGLRenderer::new();
+		renderer.set_clear_color((0.0, 0.06, 0.12).into());
+
 		let mut layer_stack = LayerStack::new();
-		layer_stack.push_back(box InputPollingUpdateLayer, &mut renderer);
+		layer_stack.push_back(box InputPollingUpdateLayer, renderer.as_mut());
 
 		Self {
 			window,
@@ -50,7 +51,7 @@ impl Engine {
 		self.layer_stack.call_update(dt);
 
 		self.renderer.clear();
-		self.layer_stack.call_render(&mut self.renderer);
+		self.layer_stack.call_render(self.renderer.as_mut());
 		self.window.swap_buffers();
 	}
 	pub fn is_running(&self) -> bool {
@@ -63,16 +64,16 @@ impl Engine {
 	// 	&mut self.layer_stack
 	// }
 	pub fn push_layer_back(&mut self, layer: Box<dyn Layer>) -> LayerHandle {
-		self.layer_stack.push_back(layer, &mut self.renderer)
+		self.layer_stack.push_back(layer, self.renderer.as_mut())
 	}
 	pub fn push_layer_front(&mut self, layer: Box<dyn Layer>) -> LayerHandle {
-		self.layer_stack.push_front(layer, &mut self.renderer)
+		self.layer_stack.push_front(layer, self.renderer.as_mut())
 	}
 	pub fn remove_layer(&mut self, handle: LayerHandle) -> bool {
 		self.layer_stack.remove_layer(handle)
 	}
-	pub fn renderer(&mut self) -> &mut Renderer {
-		&mut self.renderer
+	pub fn renderer(&mut self) -> &mut dyn Renderer {
+		self.renderer.as_mut()
 	}
 }
 

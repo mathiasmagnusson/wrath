@@ -33,12 +33,12 @@ impl LayerStack {
 			layer.0.on_update(dt);
 		}
 	}
-	pub fn call_render(&mut self, renderer: &mut Renderer) {
+	pub fn call_render(&mut self, renderer: &mut dyn Renderer) {
 		for layer in self.inner.iter_mut() {
 			layer.0.on_render(renderer);
 		}
 	}
-	pub fn push_back(&mut self, mut layer: Box<dyn Layer>, renderer: &mut Renderer) -> LayerHandle {
+	pub fn push_back(&mut self, mut layer: Box<dyn Layer>, renderer: &mut dyn Renderer) -> LayerHandle {
 		layer.on_attach(renderer);
 
 		let handle = self.handle_counter;
@@ -46,7 +46,7 @@ impl LayerStack {
 		self.inner.push_back((layer, handle));
 		handle
 	}
-	pub fn push_front(&mut self, mut layer: Box<dyn Layer>, renderer: &mut Renderer) -> LayerHandle {
+	pub fn push_front(&mut self, mut layer: Box<dyn Layer>, renderer: &mut dyn Renderer) -> LayerHandle {
 		layer.on_attach(renderer);
 
 		let handle = self.handle_counter;
@@ -84,10 +84,10 @@ impl AddAssign<u32> for LayerHandle {
 
 #[allow(unused_variables)]
 pub trait Layer {
-	fn on_attach(&mut self, renderer: &mut Renderer) {}
+	fn on_attach(&mut self, renderer: &mut dyn Renderer) {}
 	fn on_detach(&mut self) {}
 	fn on_update(&mut self, dt: Duration) {}
-	fn on_render(&mut self, renderer: &mut Renderer) {}
+	fn on_render(&mut self, renderer: &mut dyn Renderer) {}
 	fn on_window_close_requested(&mut self) {}
 	fn on_window_resize(&mut self, size: (u32, u32)) {}
 	fn on_key_press(&mut self, button: Button, repeat: bool) -> bool { false }

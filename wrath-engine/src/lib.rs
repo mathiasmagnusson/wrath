@@ -22,7 +22,6 @@ pub use layer::Layer;
 pub use layer::LayerHandle;
 pub use layer::LayerStack;
 pub use gfx::Renderer;
-pub use gfx::PlatformRenderer;
 pub use window::Window;
 pub use window::WindowProps;
 

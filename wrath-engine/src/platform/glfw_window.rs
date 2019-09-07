@@ -39,6 +39,8 @@ impl GLFWWindow {
 		// TODO: OpenGL specific code should not be here
 		gl::load_with(|s| window.get_proc_address(s));
 
+		glfw_handle().set_swap_interval(glfw::SwapInterval::None);
+
 		window.set_close_polling(true);
 		window.set_size_polling(true);
 		window.set_key_polling(true);

@@ -55,11 +55,11 @@ impl ExampleLayer {
 	pub fn new() -> Self {
 		Self {
 			vertices: vec![
-				// x     y    z    r    g    b
-				 0.5,  0.0, 0.0, 0.0, 0.0, 1.0,
-				 0.0,  0.5, 0.0, 0.0, 1.0, 0.0,
-				-0.5,  0.0, 0.0, 1.0, 0.0, 0.0,
-				 0.0, -0.5, 0.0, 0.0, 0.0, 0.0,
+				// x     y    z    r    g    b    a
+				 0.5,  0.0, 0.0, 0.0, 0.0, 1.0, 1.0,
+				 0.0,  0.5, 0.0, 0.0, 1.0, 0.0, 1.0,
+				-0.5,  0.0, 0.0, 1.0, 0.0, 0.0, 1.0,
+				 0.0, -0.5, 0.0, 1.0, 1.0, 1.0, 1.0,
 			],
 			indices: vec![
 				0, 1, 2,
@@ -69,22 +69,24 @@ impl ExampleLayer {
 				#version 330 core
 			
 				layout(location = 0) in vec3 in_pos;
-				layout(location = 1) in vec3 in_color;
+				layout(location = 1) in vec4 in_color;
 
-				uniform float rotation;
+				uniform float u_rotation;
 
 				out vec4 v_color;
+				out vec3 v_pos;
 
 				void main()
 				{
-					v_color = vec4(in_color, 1.0);
-
 					vec3 rot_pos = vec3(
-						in_pos[0]*cos(rotation) + in_pos[1]*sin(rotation),
-						in_pos[1]*cos(rotation) - in_pos[0]*sin(rotation),
+						in_pos[0]*cos(u_rotation) + in_pos[1]*sin(u_rotation),
+						in_pos[1]*cos(u_rotation) - in_pos[0]*sin(u_rotation),
 						0.0
 					);
 					gl_Position = vec4(rot_pos, 1.0);
+
+					v_color = in_color;
+					v_pos = rot_pos;
 				}
 			"##,
 			f_shad_src: r##"
@@ -93,10 +95,11 @@ impl ExampleLayer {
 				layout(location = 0) out vec4 color;
 
 				in vec4 v_color;
+				in vec3 v_pos;
 
 				void main()
 				{
-					color = v_color;
+					color = v_color * (v_pos[1] + 0.2);
 				}
 			"##,
 			va: 0,
@@ -110,7 +113,7 @@ impl ExampleLayer {
 }
 
 impl Layer for ExampleLayer {
-	fn on_attach(&mut self, renderer: &mut Renderer) {
+	fn on_attach(&mut self, renderer: &mut dyn Renderer) {
 		unsafe {
 			use wrath::gl;
 			use std::mem::size_of;
@@ -132,11 +135,11 @@ impl Layer for ExampleLayer {
 
 			// position (x, y, z)
 			gl::EnableVertexAttribArray(0);
-			gl::VertexAttribPointer(0, 3, gl::FLOAT, gl::FALSE, (size_of::<Float>() * 6) as i32, std::ptr::null_mut());
+			gl::VertexAttribPointer(0, 3, gl::FLOAT, gl::FALSE, (size_of::<Float>() * 7) as i32, std::ptr::null_mut());
 
 			// color (r, g, b)
 			gl::EnableVertexAttribArray(1);
-			gl::VertexAttribPointer(1, 3, gl::FLOAT, gl::FALSE, (size_of::<Float>() * 6) as i32, (size_of::<Float>() * 3) as _);
+			gl::VertexAttribPointer(1, 4, gl::FLOAT, gl::FALSE, (size_of::<Float>() * 7) as i32, (size_of::<Float>() * 3) as _);
 
 			gl::CreateBuffers(1, &mut self.ib);
 			gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, self.ib);
@@ -225,18 +228,18 @@ impl Layer for ExampleLayer {
 			gl::UseProgram(self.sp);
 
 			self.u_rotation = gl::GetUniformLocation(
-				self.sp, std::ffi::CString::new("rotation").unwrap().as_ptr()
+				self.sp, std::ffi::CString::new("u_rotation").unwrap().as_ptr()
 			);
 		}
 	}
 	fn on_update(&mut self, _dt: Duration) {
 		// println!("dt: {}", dt.as_secs_f64());
 	}
-	fn on_render(&mut self, _renderer: &mut Renderer) {
+	fn on_render(&mut self, _renderer: &mut dyn Renderer) {
 		unsafe {
 			use wrath::gl;
 
-			let rotation = self.start_time.elapsed().as_secs_f32() * 3.0;
+			let rotation = self.start_time.elapsed().as_secs_f32();
 
 			gl::Uniform1f(self.u_rotation, rotation);
 
