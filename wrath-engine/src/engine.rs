@@ -3,6 +3,7 @@ use std::time::Instant;
 use crate::input::INPUT_STATE;
 use crate::Button;
 use crate::Layer;
+use crate::LayerHandle;
 use crate::LayerStack;
 use crate::Renderer;
 use crate::window;
@@ -19,16 +20,19 @@ pub struct Engine {
 
 impl Engine {
 	pub fn new(props: EngineProps) -> Self {
-		let mut layer_stack = LayerStack::new();
-		layer_stack.push_back(box InputPollingUpdateLayer);
 		let window = window::create(props.window_props);
+
+		let mut renderer = Renderer::new();
+		
+		let mut layer_stack = LayerStack::new();
+		layer_stack.push_back(box InputPollingUpdateLayer, &mut renderer);
 
 		Self {
 			window,
 			is_running: true,
 			layer_stack,
 			last_update: Instant::now(),
-			renderer: Renderer::new(),
+			renderer,
 		}
 	}
 	pub fn update(&mut self) {
@@ -55,8 +59,17 @@ impl Engine {
 	pub fn exit(&mut self) {
 		self.is_running = false;
 	}
-	pub fn layer_stack(&mut self) -> &mut LayerStack {
-		&mut self.layer_stack
+	// pub fn layer_stack(&mut self) -> &mut LayerStack {
+	// 	&mut self.layer_stack
+	// }
+	pub fn push_layer_back(&mut self, layer: Box<dyn Layer>) -> LayerHandle {
+		self.layer_stack.push_back(layer, &mut self.renderer)
+	}
+	pub fn push_layer_front(&mut self, layer: Box<dyn Layer>) -> LayerHandle {
+		self.layer_stack.push_front(layer, &mut self.renderer)
+	}
+	pub fn remove_layer(&mut self, handle: LayerHandle) -> bool {
+		self.layer_stack.remove_layer(handle)
 	}
 	pub fn renderer(&mut self) -> &mut Renderer {
 		&mut self.renderer

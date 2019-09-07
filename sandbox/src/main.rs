@@ -10,6 +10,7 @@ use wrath::WindowProps;
 use wrath::Renderer;
 
 use std::time::Duration;
+use std::time::Instant;
 
 use wrath_math::Float;
 
@@ -27,46 +28,63 @@ impl Application {
 
 impl CallbackHandler for Application {
 	fn on_create(&mut self, engine: &mut Engine) {
-		self.ex_layer = engine.layer_stack().push_front(box ExampleLayer::new());
+		self.ex_layer = engine.push_layer_front(box ExampleLayer::new());
 	}
 	fn on_update(&mut self, _engine: &mut Engine) {
 		// do shit
 	}
 	fn on_exit(&mut self, engine: &mut Engine) {
-		engine.layer_stack().remove_layer(self.ex_layer);
+		engine.remove_layer(self.ex_layer);
 	}
 }
 
 struct ExampleLayer {
 	vertices: Vec<Float>,
-	indices: Vec<usize>,
+	indices: Vec<u16>,
 	v_shad_src: &'static str,
 	f_shad_src: &'static str,
 	va: u32,
 	vb: u32,
 	ib: u32,
 	sp: u32,
+	u_rotation: i32,
+	start_time: Instant,
 }
 
 impl ExampleLayer {
 	pub fn new() -> Self {
 		Self {
 			vertices: vec![
-				-0.5, -0.5, 0.0,
-				 0.5, -0.5, 0.0,
-				 0.0,  0.5, 0.0,
+				// x     y    z    r    g    b
+				 0.5,  0.0, 0.0, 0.0, 0.0, 1.0,
+				 0.0,  0.5, 0.0, 0.0, 1.0, 0.0,
+				-0.5,  0.0, 0.0, 1.0, 0.0, 0.0,
+				 0.0, -0.5, 0.0, 0.0, 0.0, 0.0,
 			],
 			indices: vec![
 				0, 1, 2,
+				0, 2, 3,
 			],
 			v_shad_src: r##"
 				#version 330 core
 			
 				layout(location = 0) in vec3 in_pos;
+				layout(location = 1) in vec3 in_color;
+
+				uniform float rotation;
+
+				out vec4 v_color;
 
 				void main()
 				{
-					gl_Position = vec4(in_pos, 1.0);
+					v_color = vec4(in_color, 1.0);
+
+					vec3 rot_pos = vec3(
+						in_pos[0]*cos(rotation) + in_pos[1]*sin(rotation),
+						in_pos[1]*cos(rotation) - in_pos[0]*sin(rotation),
+						0.0
+					);
+					gl_Position = vec4(rot_pos, 1.0);
 				}
 			"##,
 			f_shad_src: r##"
@@ -74,21 +92,25 @@ impl ExampleLayer {
 			
 				layout(location = 0) out vec4 color;
 
+				in vec4 v_color;
+
 				void main()
 				{
-					color = vec4(1.0, 1.0, 1.0, 1.0);
+					color = v_color;
 				}
 			"##,
 			va: 0,
 			vb: 0,
 			ib: 0,
 			sp: 0,
+			u_rotation: -1,
+			start_time: Instant::now(),
 		}
 	}
 }
 
 impl Layer for ExampleLayer {
-	fn on_attach(&mut self) {
+	fn on_attach(&mut self, renderer: &mut Renderer) {
 		unsafe {
 			use wrath::gl;
 			use std::mem::size_of;
@@ -108,8 +130,13 @@ impl Layer for ExampleLayer {
 				gl::STATIC_DRAW
 			);
 
+			// position (x, y, z)
 			gl::EnableVertexAttribArray(0);
-			gl::VertexAttribPointer(0, 3, gl::FLOAT, gl::FALSE, (size_of::<Float>() * 3) as i32, std::ptr::null_mut());
+			gl::VertexAttribPointer(0, 3, gl::FLOAT, gl::FALSE, (size_of::<Float>() * 6) as i32, std::ptr::null_mut());
+
+			// color (r, g, b)
+			gl::EnableVertexAttribArray(1);
+			gl::VertexAttribPointer(1, 3, gl::FLOAT, gl::FALSE, (size_of::<Float>() * 6) as i32, (size_of::<Float>() * 3) as _);
 
 			gl::CreateBuffers(1, &mut self.ib);
 			gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, self.ib);
@@ -196,9 +223,11 @@ impl Layer for ExampleLayer {
 			gl::DetachShader(self.sp, fs);
 
 			gl::UseProgram(self.sp);
-		}
 
-		println!("va: {} vb: {} ib: {} sp: {}", self.va, self.vb, self.ib, self.sp);
+			self.u_rotation = gl::GetUniformLocation(
+				self.sp, std::ffi::CString::new("rotation").unwrap().as_ptr()
+			);
+		}
 	}
 	fn on_update(&mut self, _dt: Duration) {
 		// println!("dt: {}", dt.as_secs_f64());
@@ -207,7 +236,25 @@ impl Layer for ExampleLayer {
 		unsafe {
 			use wrath::gl;
 
-			gl::DrawElements(gl::TRIANGLES, 6, self.indices.len() as _, std::ptr::null());
+			let rotation = self.start_time.elapsed().as_secs_f32() * 3.0;
+
+			gl::Uniform1f(self.u_rotation, rotation);
+
+			gl::DrawElements(gl::TRIANGLES, self.indices.len() as _, gl::UNSIGNED_SHORT, std::ptr::null());
+
+			let err = gl::GetError();
+			if err != gl::NO_ERROR {
+				panic!("Open gl error: {}", match err {
+					gl::INVALID_ENUM => "INVALID_ENUM",
+					gl::INVALID_VALUE => "INVALID_VALUE",
+					gl::INVALID_OPERATION => "INVALID_OPERATION",
+					gl::INVALID_FRAMEBUFFER_OPERATION => "INVALID_FRAMEBUFFER_OPERATION",
+					gl::OUT_OF_MEMORY => "OUT_OF_MEMORY",
+					gl::STACK_UNDERFLOW => "STACK_UNDERFLOW",
+					gl::STACK_OVERFLOW => "STACK_OVERFLOW",
+					_ => "undefined",
+				});
+			}
 		}
 	}
 	fn on_detach(&mut self) {

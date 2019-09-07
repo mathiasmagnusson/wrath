@@ -38,16 +38,16 @@ impl LayerStack {
 			layer.0.on_render(renderer);
 		}
 	}
-	pub fn push_back(&mut self, mut layer: Box<dyn Layer>) -> LayerHandle {
-		layer.on_attach();
+	pub fn push_back(&mut self, mut layer: Box<dyn Layer>, renderer: &mut Renderer) -> LayerHandle {
+		layer.on_attach(renderer);
 
 		let handle = self.handle_counter;
 		self.handle_counter += 1;
 		self.inner.push_back((layer, handle));
 		handle
 	}
-	pub fn push_front(&mut self, mut layer: Box<dyn Layer>) -> LayerHandle {
-		layer.on_attach();
+	pub fn push_front(&mut self, mut layer: Box<dyn Layer>, renderer: &mut Renderer) -> LayerHandle {
+		layer.on_attach(renderer);
 
 		let handle = self.handle_counter;
 		self.handle_counter += 1;
@@ -84,7 +84,7 @@ impl AddAssign<u32> for LayerHandle {
 
 #[allow(unused_variables)]
 pub trait Layer {
-	fn on_attach(&mut self) {}
+	fn on_attach(&mut self, renderer: &mut Renderer) {}
 	fn on_detach(&mut self) {}
 	fn on_update(&mut self, dt: Duration) {}
 	fn on_render(&mut self, renderer: &mut Renderer) {}
