@@ -21,6 +21,7 @@ pub struct OpenGLRenderer {
 	shaders: HashMap<ShaderHandle, Shader>,
 	bound_shader: ShaderHandle,
 	meshes: HashMap<MeshHandle, Mesh>,
+	bound_mesh: MeshHandle,
 }
 
 impl OpenGLRenderer {
@@ -35,6 +36,7 @@ impl OpenGLRenderer {
 			shaders: Default::default(),
 			bound_shader: ShaderHandle::none(),
 			meshes: Default::default(),
+			bound_mesh: MeshHandle::none(),
 		}
 	}
 	fn _delete_shader(&mut self, shader: Shader) {
@@ -147,10 +149,33 @@ impl Renderer for OpenGLRenderer {
 
 		handle
 	}
+	fn bind_mesh(&mut self, handle: MeshHandle) {
+		if handle == self.bound_mesh { return };
+		let mesh = &self.meshes[&handle];
+		unsafe {
+			gl::BindVertexArray(mesh.va);
+			gl::BindBuffer(gl::ARRAY_BUFFER, mesh.vb);
+			gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, mesh.ib);
+		}
+		self.bound_mesh = handle;
+	}
 	fn delete_mesh(&mut self, handle: MeshHandle) {
 		let mesh = self.meshes.remove(&handle)
 			.expect("Tried to delete unknown mesh");
 		self._delete_mesh(mesh);
+	}
+	fn render(&mut self, mh: MeshHandle, sh: ShaderHandle) {
+		self.bind_mesh(mh);
+		self.bind_shader(sh);
+		let mesh = &self.meshes[&mh];
+		unsafe {
+			gl::DrawElements(
+				gl::TRIANGLES,
+				mesh.index_count,
+				mesh.index_type,
+				std::ptr::null_mut(),
+			);
+		}
 	}
 }
 
@@ -291,6 +316,8 @@ struct Mesh {
 	va: u32,
 	vb: u32,
 	ib: u32,
+	index_count: i32,
+	index_type: u32,
 }
 
 impl Mesh {
@@ -339,6 +366,12 @@ impl Mesh {
 				va,
 				vb,
 				ib,
+				index_count: indices.len() as i32,
+				index_type: match indices {
+					Indices::U8 (_) => gl::UNSIGNED_BYTE,
+					Indices::U16(_) => gl::UNSIGNED_SHORT,
+					Indices::U32(_) => gl::UNSIGNED_INT,
+				}
 			}
 		}
 	}

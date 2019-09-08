@@ -46,34 +46,16 @@ impl CallbackHandler for Application {
 }
 
 struct ExampleLayer {
-	vertices: Vertices,
-	layout: BufferLayout,
-	indices: Indices,
 	shader: ShaderHandle,
-	mesh: MeshHandle,
+	meshes: [MeshHandle; 2],
 	start_time: Instant,
 }
 
 impl ExampleLayer {
 	pub fn new() -> Self {
 		Self {
-			vertices: vec![
-				// x     y    z    r    g    b    a
-				 0.5,  0.0, 0.0, 0.0, 0.0, 1.0, 0.5,
-				 0.0,  0.5, 0.0, 0.0, 1.0, 0.0, 1.0,
-				-0.5,  0.0, 0.0, 1.0, 0.0, 0.0, 0.5,
-				 0.0, -0.5, 0.0, 1.0, 1.0, 1.0, 0.0,
-			].into(),
-			layout: BufferLayout::new(&[
-				BufferElement::Vec3,
-				BufferElement::Vec4,
-			]),
-			indices: vec![
-				0, 1, 2,
-				0, 2, 3u16,
-			].into(),
 			shader: ShaderHandle::none(),
-			mesh: MeshHandle::none(),
+			meshes: [MeshHandle::none(); 2],
 			start_time: Instant::now(),
 		}
 	}
@@ -81,11 +63,38 @@ impl ExampleLayer {
 
 impl Layer for ExampleLayer {
 	fn on_attach(&mut self, renderer: &mut dyn Renderer) {
-		self.mesh = renderer.create_mesh(
-			&self.vertices,
-			&self.layout,
-			&self.indices,
-		);
+		let layout = BufferLayout::new(&[
+			BufferElement::Vec3,
+			BufferElement::Vec4,
+		]);
+		let indices = Indices::U8(vec![
+			0, 1, 2,
+			0, 2, 3,
+		]);
+		self.meshes = [
+			renderer.create_mesh(
+				&Vertices::new(vec![
+					// x     y    z    r    g    b    a
+					 0.5,  0.0, 0.0, 0.0, 0.0, 1.0, 1.0,
+					 0.0,  0.5, 0.0, 0.0, 1.0, 0.0, 1.0,
+					-0.5,  0.0, 0.0, 1.0, 0.0, 0.0, 1.0,
+					 0.0, -0.5, 0.0, 1.0, 1.0, 1.0, 0.0,
+				]),
+				&layout,
+				&indices,
+			),
+			renderer.create_mesh(
+				&Vertices::new(vec![
+					// x     y     z    r    g    b    a
+					 0.25, 0.0,  0.0, 1.0, 1.0, 1.0, 1.0,
+					 0.0,  0.25, 0.0, 1.0, 1.0, 1.0, 1.0,
+					-0.25, 0.0,  0.0, 1.0, 1.0, 1.0, 1.0,
+					 0.0, -0.25, 0.0, 1.0, 1.0, 1.0, 1.0,
+				]),
+				&layout,
+				&indices,
+			)
+		];
 
 		self.shader = renderer.create_shader(
 			std::path::Path::new("sandbox/assets/shaders/cool")
@@ -97,43 +106,33 @@ impl Layer for ExampleLayer {
 		// println!("dt: {}", dt.as_secs_f64());
 	}
 	fn on_render(&mut self, renderer: &mut dyn Renderer) {
-		unsafe {
-			use wrath::gl;
+		let elapsed = self.start_time.elapsed().as_secs_f32();
+		renderer.set_clear_color((
+			elapsed.tan(),
+			elapsed.sin(),
+			elapsed.cos(),
+		).into());
 
-			let elapsed = self.start_time.elapsed().as_secs_f32();
-			renderer.set_clear_color((
-				elapsed.tan(),
-				elapsed.sin(),
-				elapsed.cos(),
-			).into());
+		let rotation = elapsed;
 
-			let rotation = elapsed;
+		renderer.set_uniform(
+			self.shader,
+			"u_rotation",
+			ShaderUniform::Float(rotation)
+		);
 
-			renderer.set_uniform(
-				self.shader,
-				"u_rotation",
-				ShaderUniform::Float(rotation)
-			);
-
-			gl::DrawElements(gl::TRIANGLES, self.indices.len() as _, gl::UNSIGNED_SHORT, std::ptr::null());
-
-			let err = gl::GetError();
-			if err != gl::NO_ERROR {
-				panic!("Open gl error: {}", match err {
-					gl::INVALID_ENUM => "INVALID_ENUM",
-					gl::INVALID_VALUE => "INVALID_VALUE",
-					gl::INVALID_OPERATION => "INVALID_OPERATION",
-					gl::INVALID_FRAMEBUFFER_OPERATION => "INVALID_FRAMEBUFFER_OPERATION",
-					gl::OUT_OF_MEMORY => "OUT_OF_MEMORY",
-					gl::STACK_UNDERFLOW => "STACK_UNDERFLOW",
-					gl::STACK_OVERFLOW => "STACK_OVERFLOW",
-					_ => "undefined",
-				});
+		if Button::LShift.is_pressed() {
+			for mesh in self.meshes.iter().rev() {
+				renderer.render(*mesh, self.shader);
+			}
+		} else {
+			for mesh in self.meshes.iter() {
+				renderer.render(*mesh, self.shader);
 			}
 		}
 	}
 	fn on_detach(&mut self, renderer: &mut dyn Renderer) {
-		renderer.delete_mesh(self.mesh);
+		// renderer.delete_mesh(self.mesh);
 		renderer.delete_shader(self.shader);
 	}
 	fn on_window_resize(&mut self, size: (u32, u32)) {

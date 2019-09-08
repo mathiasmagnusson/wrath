@@ -13,7 +13,9 @@ pub trait Renderer {
 	fn delete_shader(&mut self, handle: ShaderHandle);
 	fn set_uniform(&mut self, handle: ShaderHandle, name: &str, value: ShaderUniform);
 	fn create_mesh(&mut self, vertices: &Vertices, layout: &BufferLayout, indices: &Indices) -> MeshHandle;
+	fn bind_mesh(&mut self, handle: MeshHandle);
 	fn delete_mesh(&mut self, handle: MeshHandle);
+	fn render(&mut self, mh: MeshHandle, sh: ShaderHandle);
 }
 
 // TODO: create "Bindable" trait so you can
@@ -69,6 +71,9 @@ pub enum ShaderUniform {
 pub struct Vertices(Vec<Float>);
 
 impl Vertices {
+	pub fn new(v: Vec<Float>) -> Self {
+		Self(v)
+	}
 	pub fn size(&self) -> usize {
 		std::mem::size_of_val(self.0.as_slice())
 	}
