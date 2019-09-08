@@ -1,184 +1,220 @@
 #![feature(box_syntax)]
 
-use wrath::Button;
-use wrath::BufferElement;
-use wrath::BufferLayout;
-use wrath::CallbackHandler;
-use wrath::Engine;
-use wrath::EngineProps;
-use wrath::Indices;
-use wrath::Layer;
-use wrath::LayerHandle;
-use wrath::MeshHandle;
-use wrath::Renderer;
-use wrath::ShaderHandle;
-use wrath::ShaderUniform;
-use wrath::Vertices;
-use wrath::WindowProps;
+mod example_layer;
+// use example_layer::ExampleLayer;
 
 use std::time::Duration;
-use std::time::Instant;
+use std::path::Path;
 
-use wrath_math::Float;
+fn main() {
+	wrath::init(Application::new(), wrath::EngineProps {
+		window_props: wrath::WindowProps {
+			title: "Curls of Lordraft".into(),
+			size: (800, 500),
+		}
+	});
+}
 
 struct Application {
-	ex_layer: LayerHandle,
+	ex_layer: wrath::LayerHandle,
 }
 
 impl Application {
 	fn new() -> Self {
 		Self {
-			ex_layer: LayerHandle::none(),
+			ex_layer: wrath::LayerHandle::none(),
 		}
 	}
 }
 
-impl CallbackHandler for Application {
-	fn on_create(&mut self, engine: &mut Engine) {
-		self.ex_layer = engine.push_layer_front(box ExampleLayer::new());
+impl wrath::CallbackHandler for Application {
+	fn on_create(&mut self, engine: &mut wrath::Engine) {
+		self.ex_layer = engine.push_layer_front(box SnakeLayer::new());
 	}
-	fn on_update(&mut self, _engine: &mut Engine) {
+	fn on_update(&mut self, _engine: &mut wrath::Engine) {
 		// do shit
 	}
-	fn on_exit(&mut self, engine: &mut Engine) {
+	fn on_exit(&mut self, engine: &mut wrath::Engine) {
 		engine.remove_layer(self.ex_layer);
 	}
 }
 
-struct ExampleLayer {
-	shader: ShaderHandle,
-	meshes: [MeshHandle; 2],
-	start_time: Instant,
-	rotation: Float,
+const COLS: u32 = 16;
+const ROWS: u32 = 10;
+const SNAKE_COLOR: wrath_math::Vec4 = wrath_math::Vec4::new(0.0, 1.0, 0.0, 1.0);
+const FRUIT_COLOR: wrath_math::Vec4 = wrath_math::Vec4::new(1.0, 0.0, 0.0, 1.0);
+
+struct SnakeLayer {
+	cube_mesh: wrath::MeshHandle,
+	flat_cube_shader: wrath::ShaderHandle,
+	elapsed: Duration,
+	frame_time: Duration,
+	snake: Vec<(u32, u32)>,
+	dir: u8,
+	turned: bool,
+	fruit: (u32, u32),
 }
 
-impl ExampleLayer {
-	pub fn new() -> Self {
+impl SnakeLayer {
+	fn new() -> Self {
 		Self {
-			shader: ShaderHandle::none(),
-			meshes: [MeshHandle::none(); 2],
-			start_time: Instant::now(),
-			rotation: 0.0,
+			cube_mesh: wrath::MeshHandle::none(),
+			flat_cube_shader: wrath::ShaderHandle::none(),
+			elapsed: Duration::new(0, 0),
+			frame_time: Duration::from_millis(200),
+			snake: vec![(1, 1)],
+			dir: 0,
+			turned: false,
+			fruit: (
+				rand::random::<u32>() % COLS,
+				rand::random::<u32>() % ROWS,
+			)
 		}
+	}
+	fn replace_fruit(&mut self) {
+		self.fruit = (
+			rand::random::<u32>() % COLS,
+			rand::random::<u32>() % ROWS,
+		);
+	}
+	fn step(&mut self) {
+		self.turned = false;
+		let delta = match self.dir {
+			0 => ( 1,  0),
+			1 => ( 0,  1),
+			2 => (-1,  0),
+			3 => ( 0, -1),
+			_ => panic!(),
+		};
+		let head = self.snake.last().unwrap();
+		let new_pos = (
+			(head.0 as i32 + delta.0),
+			(head.1 as i32 + delta.1),
+		);
+		if new_pos.0 < 0 ||
+			new_pos.1 < 0 ||
+			new_pos.0 == COLS as _ ||
+			new_pos.1 == ROWS as _
+		{
+			return self.game_over();
+		}
+		let new_pos = (
+			new_pos.0 as u32,
+			new_pos.1 as u32,
+		);
+		if self.snake.contains(&new_pos) {
+			return self.game_over();
+		}
+		self.snake.push(new_pos);
+		let ate = new_pos == self.fruit;
+		if ate {
+			self.replace_fruit();
+		}
+		else {
+			self.snake.remove(0);
+		}
+	}
+	fn game_over(&mut self) {
+		self.snake = vec![(1, 1)];
+		self.dir = 0;
+		self.replace_fruit();
 	}
 }
 
-impl Layer for ExampleLayer {
-	fn on_attach(&mut self, renderer: &mut dyn Renderer) {
-		let layout = BufferLayout::new(&[
-			BufferElement::Vec3,
-			BufferElement::Vec4,
-		]);
-		let indices = Indices::U8(vec![
-			0, 1, 2,
-			0, 2, 3,
-		]);
-		self.meshes = [
-			renderer.create_mesh(
-				&Vertices::new(vec![
-					// x     y    z    r    g    b    a
-					 0.5,  0.0, 0.0, 0.0, 0.0, 1.0, 1.0,
-					 0.0,  0.5, 0.0, 0.0, 1.0, 0.0, 1.0,
-					-0.5,  0.0, 0.0, 1.0, 0.0, 0.0, 1.0,
-					 0.0, -0.5, 0.0, 1.0, 1.0, 1.0, 0.0,
-				]),
-				&layout,
-				&indices,
-			),
-			renderer.create_mesh(
-				&Vertices::new(vec![
-					// x     y     z    r    g    b    a
-					 0.25, 0.0,  0.0, 1.0, 1.0, 1.0, 1.0,
-					 0.0,  0.25, 0.0, 1.0, 1.0, 1.0, 1.0,
-					-0.25, 0.0,  0.0, 1.0, 1.0, 1.0, 1.0,
-					 0.0, -0.25, 0.0, 1.0, 1.0, 1.0, 1.0,
-				]),
-				&layout,
-				&indices,
-			)
-		];
-
-		self.shader = renderer.create_shader(
-			std::path::Path::new("sandbox/assets/shaders/cool")
-		);
-
-		renderer.bind_shader(self.shader);
-	}
+impl wrath::Layer for SnakeLayer {
 	fn on_update(&mut self, dt: Duration) {
-		let speed = std::f32::consts::PI * 2.0;
-		if Button::E.is_pressed() {
-			self.rotation += speed * dt.as_secs_f32();
+		if !self.turned {
+			if wrath::Button::ArrowRight.is_pressed() {
+				self.dir = 0;
+				self.turned = true;
+			}
+			if wrath::Button::ArrowUp.is_pressed() {
+				self.dir = 1;
+				self.turned = true;
+			}
+			if wrath::Button::ArrowLeft.is_pressed() {
+				self.dir = 2;
+				self.turned = true;
+			}
+			if wrath::Button::ArrowDown.is_pressed() {
+				self.dir = 3;
+				self.turned = true;
+			}
 		}
-		if Button::Q.is_pressed() {
-			self.rotation -= speed * dt.as_secs_f32();
+
+		if wrath::Button::Q.is_pressed() {
+			std::process::exit(0);
+		}
+
+		self.elapsed += dt;
+		if self.elapsed >= self.frame_time {
+			self.step();
+			self.elapsed -= self.frame_time;
 		}
 	}
-	fn on_render(&mut self, renderer: &mut dyn Renderer) {
-		let elapsed = self.start_time.elapsed().as_secs_f32();
-		renderer.set_clear_color((
-			elapsed.tan(),
-			elapsed.sin(),
-			elapsed.cos(),
-		).into());
+	fn on_attach(&mut self, renderer: &mut dyn wrath::Renderer) {
+		self.cube_mesh = renderer.create_mesh(
+			&wrath::Vertices::new(vec![
+				//x    y  (z)
+				1.0, 1.0, 0.0,
+				0.0, 1.0, 0.0,
+				0.0, 0.0, 0.0,
+				1.0, 0.0, 0.0,
+			]),
+			&wrath::BufferLayout::new(&[
+				wrath::BufferElement::Vec3
+			]),
+			&wrath::Indices::U8(vec![
+				0, 1, 2,
+				2, 3, 0,
+			]),
+		);
+		self.flat_cube_shader = renderer.create_shader(
+			Path::new("sandbox/assets/shaders/cube.glsl")
+		);
 
 		renderer.set_uniform(
-			self.shader,
-			"u_rotation",
-			ShaderUniform::Float(self.rotation)
+			self.flat_cube_shader,
+			"u_cols",
+			COLS.into(), // same as wrath::ShaderUniform::U32(COLS)
+		);
+		renderer.set_uniform(
+			self.flat_cube_shader,
+			"u_rows",
+			ROWS.into(),
 		);
 
-		if Button::LShift.is_pressed() {
-			for mesh in self.meshes.iter().rev() {
-				renderer.render(*mesh, self.shader);
-			}
-		} else {
-			for mesh in self.meshes.iter() {
-				renderer.render(*mesh, self.shader);
+		renderer.set_clear_color((0.0, 0.0, 1.0).into());
+	}
+	fn on_render(&mut self, renderer: &mut dyn wrath::Renderer) {
+		for x in 0..COLS {
+			renderer.set_uniform(
+				self.flat_cube_shader,
+				"u_x",
+				x.into(),
+			);
+			for y in 0..ROWS {
+				renderer.set_uniform(
+					self.flat_cube_shader,
+					"u_y",
+					y.into(),
+				);
+				if self.snake.contains(&(x, y)) {
+					renderer.set_uniform(
+						self.flat_cube_shader,
+						"u_color",
+						SNAKE_COLOR.into(),
+					);
+					renderer.render(self.cube_mesh, self.flat_cube_shader);
+				} else if (x, y) == self.fruit {
+					renderer.set_uniform(
+						self.flat_cube_shader,
+						"u_color",
+						FRUIT_COLOR.into()
+					);
+					renderer.render(self.cube_mesh, self.flat_cube_shader);
+				}
 			}
 		}
 	}
-	// fn on_detach(&mut self, renderer: &mut dyn Renderer) {
-	// 	renderer.delete_mesh(self.mesh);
-	// 	renderer.delete_shader(self.shader);
-	// }
-	// fn on_window_resize(&mut self, size: (u32, u32)) {
-	// 	println!("Window resized: ({}, {})", size.0, size.1);
-	// }
-	// fn on_text_written(&mut self, which: char) -> bool {
-	// 	println!("{}", which);
-	// 	false
-	// }
-	// fn on_key_press(&mut self, button: Button, repeat: bool) -> bool {
-	// 	println!("Key pressed: {:?} {}", button, if repeat { "again" } else { "" });
-	// 	false
-	// }
-	// fn on_key_release(&mut self, button: Button) -> bool {
-	// 	println!("Key released: {:?}", button);
-	// 	false
-	// }
-	// fn on_mouse_move(&mut self, position: (u32, u32), delta: (i32, i32)) -> bool {
-	// 	println!("Mouse moved to ({}, {}), Δ ({}, {})", position.0, position.1, delta.0, delta.1);
-	// 	false
-	// }
-	// fn on_mouse_down(&mut self, button: Button) -> bool {
-	// 	println!("Click {:?}!", button);
-	// 	false
-	// }
-	// fn on_mouse_up(&mut self, button: Button) -> bool {
-	// 	println!("Click {:?}¡", button);
-	// 	false
-	// }
-	// fn on_mouse_scroll(&mut self, delta: (Float, Float)) -> bool {
-	// 	println!("Scroll: ({}, {})", delta.0, delta.1);
-	// 	false
-	// }
-}
-
-fn main() {
-	wrath::init(Application::new(), EngineProps {
-		window_props: WindowProps {
-			title: "Curls of Lordraft".into(),
-			size: (1080, 720),
-		}
-	});
 }

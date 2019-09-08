@@ -10,3 +10,4 @@ publish = false
 [dependencies]
 wrath = { path = "../wrath-engine" }
 wrath-math = { path = "../wrath-math" }
+rand = "0.7.0"
