@@ -41,9 +41,10 @@ impl OpenGLRenderer {
 	}
 	fn _delete_shader(&mut self, shader: Shader) {
 		unsafe {
-			gl::DeleteProgram(shader.id);
+			gl_call("glDeleteProgram", || {
+				gl::DeleteProgram(shader.id);
+			});
 		}
-		eprintln!("deleted shader");
 	}
 	fn _delete_mesh(&mut self, mesh: Mesh) {
 		unsafe {
@@ -51,7 +52,6 @@ impl OpenGLRenderer {
 			gl::DeleteBuffers(1, &mesh.vb);
 			gl::DeleteBuffers(1, &mesh.ib);
 		}
-		eprintln!("deleted mesh");
 	}
 }
 
@@ -120,24 +120,28 @@ impl Renderer for OpenGLRenderer {
 			if !shader.uniform_cache.contains_key(name) {
 				shader.uniform_cache.insert(
 					name.into(),
-					gl::GetUniformLocation(
-						shader.id,
-						CString::new(name)
-							.unwrap()
-							.as_ptr()
-					)
+					gl_call("getGetUniformLocation", || {
+						gl::GetUniformLocation(
+							shader.id,
+							CString::new(name)
+								.unwrap()
+								.as_ptr()
+						)
+					}),
 				);
 			}
 			let location = shader.uniform_cache[name];
 
 			self.bind_shader(handle);
 
-			match val {
-				ShaderUniform::Float(val) => gl::Uniform1f(location, val),
-				ShaderUniform::Vec3(val) => gl::Uniform3f(location, val.x(), val.y(), val.z()),
-				ShaderUniform::Int(val) => gl::Uniform1i(location, val),
-				ShaderUniform::Uint(val) => gl::Uniform1ui(location, val),
-			}
+			gl_call("glUniform*", || {
+				match val {
+					ShaderUniform::Float(val) => gl::Uniform1f(location, val),
+					ShaderUniform::Vec3(val) => gl::Uniform3f(location, val.x(), val.y(), val.z()),
+					ShaderUniform::Int(val) => gl::Uniform1i(location, val),
+					ShaderUniform::Uint(val) => gl::Uniform1ui(location, val),
+				}
+			});
 		}
 	}
 	fn create_mesh(&mut self, vertices: &Vertices, layout: &BufferLayout, indices: &Indices) -> MeshHandle {
@@ -153,9 +157,11 @@ impl Renderer for OpenGLRenderer {
 		if handle == self.bound_mesh { return };
 		let mesh = &self.meshes[&handle];
 		unsafe {
-			gl::BindVertexArray(mesh.va);
-			gl::BindBuffer(gl::ARRAY_BUFFER, mesh.vb);
-			gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, mesh.ib);
+			gl_call("bind mesh", || {
+				gl::BindVertexArray(mesh.va);
+				gl::BindBuffer(gl::ARRAY_BUFFER, mesh.vb);
+				gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, mesh.ib);
+			});
 		}
 		self.bound_mesh = handle;
 	}
@@ -169,12 +175,14 @@ impl Renderer for OpenGLRenderer {
 		self.bind_shader(sh);
 		let mesh = &self.meshes[&mh];
 		unsafe {
-			gl::DrawElements(
-				gl::TRIANGLES,
-				mesh.index_count,
-				mesh.index_type,
-				std::ptr::null_mut(),
-			);
+			gl_call("glDrawElements", || {
+				gl::DrawElements(
+					gl::TRIANGLES,
+					mesh.index_count,
+					mesh.index_type,
+					std::ptr::null_mut(),
+				);
+			});
 		}
 	}
 }
@@ -197,13 +205,15 @@ impl Shader {
 
 fn compile_shader(src: &str, type_: ShaderType) -> PartialShader {
 	unsafe {
-		let id = gl::CreateShader(match type_ {
+		let id = gl_call("glCreateShader", || gl::CreateShader(match type_ {
 			ShaderType::Vertex => gl::VERTEX_SHADER,
 			ShaderType::Fragment => gl::FRAGMENT_SHADER,
-		});
+		}));
 		let ptr = src.as_ptr() as *const i8;
 		let len = src.len() as i32;
-		gl::ShaderSource(id, 1, &ptr, &len);
+		gl_call("glShaderSource", || {
+			gl::ShaderSource(id, 1, &ptr, &len)
+		});
 		gl::CompileShader(id);
 
 		let mut success = 0;
@@ -232,7 +242,9 @@ fn link_shaders(shaders: &[PartialShader]) -> Shader {
 		let id = gl::CreateProgram();
 
 		for shader in shaders {
-			gl::AttachShader(id, *shader);
+			gl_call("glAttachShader", || {
+				gl::AttachShader(id, *shader);
+			});
 		}
 		gl::LinkProgram(id);
 
@@ -332,35 +344,41 @@ impl Mesh {
 			gl::CreateBuffers(1, &mut vb);
 			gl::BindBuffer(gl::ARRAY_BUFFER, vb);
 
-			gl::BufferData(
-				gl::ARRAY_BUFFER,
-				vertices.size() as isize,
-				vertices.as_ptr() as *const _,
-				gl::STATIC_DRAW,
-			);
+			gl_call("glBufferData array buffer", || {
+				gl::BufferData(
+					gl::ARRAY_BUFFER,
+					vertices.size() as isize,
+					vertices.as_ptr() as *const _,
+					gl::STATIC_DRAW,
+				);
+			});
 
 			for i in 0..layout.len {
-				gl::EnableVertexAttribArray(i as u32);
-				gl::VertexAttribPointer(
-					i as u32,
-					layout.counts[i] as i32,
-					gl::FLOAT, // data type
-					gl::FALSE, // normalize
-					layout.stride as i32,
-					layout.offsets[i] as _,
-				);
+				gl_call("glEnableVertexAttribArray | glVertexAttribPointer", || {
+					gl::EnableVertexAttribArray(i as u32);
+					gl::VertexAttribPointer(
+						i as u32,
+						layout.counts[i] as i32,
+						gl::FLOAT, // data type
+						gl::FALSE, // normalize
+						layout.stride as i32,
+						layout.offsets[i] as _,
+					);
+				});
 			}
 
 			let mut ib = 0;
 			gl::CreateBuffers(1, &mut ib);
 			gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, ib);
 
-			gl::BufferData(
-				gl::ELEMENT_ARRAY_BUFFER,
-				indices.size() as isize,
-				indices.as_ptr(),
-				gl::STATIC_DRAW,
-			);
+			gl_call("glBufferData index buffer", || {
+				gl::BufferData(
+					gl::ELEMENT_ARRAY_BUFFER,
+					indices.size() as isize,
+					indices.as_ptr(),
+					gl::STATIC_DRAW,
+				);
+			});
 
 			Self {
 				va,
@@ -374,5 +392,34 @@ impl Mesh {
 				}
 			}
 		}
+	}
+}
+
+fn gl_call<T, F: FnOnce() -> T>(ident: &'static str, f: F) -> T {
+	if cfg!(debug_assertions) {
+		unsafe {
+			loop {
+				if gl::GetError() == gl::NO_ERROR { break };
+			}
+
+			let ret = f();
+
+			let err = gl::GetError();
+			if err != gl::NO_ERROR {
+				panic!("Open gl error at {}: {}", ident, match err {
+					gl::INVALID_ENUM => "INVALID_ENUM",
+					gl::INVALID_VALUE => "INVALID_VALUE",
+					gl::INVALID_OPERATION => "INVALID_OPERATION",
+					gl::INVALID_FRAMEBUFFER_OPERATION => "INVALID_FRAMEBUFFER_OPERATION",
+					gl::OUT_OF_MEMORY => "OUT_OF_MEMORY",
+					gl::STACK_UNDERFLOW => "STACK_UNDERFLOW",
+					gl::STACK_OVERFLOW => "STACK_OVERFLOW",
+					_ => "undefined",
+				});
+			}
+			ret
+		}
+	} else {
+		f()
 	}
 }
