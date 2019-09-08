@@ -7,5 +7,5 @@ in vec3 v_pos;
 
 void main()
 {
-	color = v_color * (v_pos[1] + 0.2);
+	color = v_color;
 }

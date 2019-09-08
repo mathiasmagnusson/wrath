@@ -55,10 +55,10 @@ impl ExampleLayer {
 		Self {
 			vertices: vec![
 				// x     y    z    r    g    b    a
-				 0.5,  0.0, 0.0, 0.0, 0.0, 1.0, 1.0,
+				 0.5,  0.0, 0.0, 0.0, 0.0, 1.0, 0.5,
 				 0.0,  0.5, 0.0, 0.0, 1.0, 0.0, 1.0,
-				-0.5,  0.0, 0.0, 1.0, 0.0, 0.0, 1.0,
-				 0.0, -0.5, 0.0, 1.0, 1.0, 1.0, 1.0,
+				-0.5,  0.0, 0.0, 1.0, 0.0, 0.0, 0.5,
+				 0.0, -0.5, 0.0, 1.0, 1.0, 1.0, 0.0,
 			],
 			indices: vec![
 				0, 1, 2,
@@ -102,7 +102,7 @@ impl Layer for ExampleLayer {
 			gl::EnableVertexAttribArray(0);
 			gl::VertexAttribPointer(0, 3, gl::FLOAT, gl::FALSE, (size_of::<Float>() * 7) as i32, std::ptr::null_mut());
 
-			// color (r, g, b)
+			// color (r, g, b, a)
 			gl::EnableVertexAttribArray(1);
 			gl::VertexAttribPointer(1, 4, gl::FLOAT, gl::FALSE, (size_of::<Float>() * 7) as i32, (size_of::<Float>() * 3) as _);
 
@@ -130,7 +130,14 @@ impl Layer for ExampleLayer {
 		unsafe {
 			use wrath::gl;
 
-			let rotation = self.start_time.elapsed().as_secs_f32();
+			let elapsed = self.start_time.elapsed().as_secs_f32();
+			renderer.set_clear_color((
+				elapsed.tan(),
+				elapsed.sin(),
+				elapsed.cos(),
+			).into());
+
+			let rotation = elapsed;
 
 			renderer.set_uniform(
 				self.shader,

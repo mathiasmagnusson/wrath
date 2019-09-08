@@ -20,6 +20,10 @@ pub struct OpenGLRenderer {
 
 impl OpenGLRenderer {
 	pub fn new() -> Self {
+		unsafe {
+			gl::Enable(gl::BLEND);
+			gl::BlendFunc(gl::SRC_ALPHA, gl::ONE_MINUS_SRC_ALPHA);
+		}
 		Self {
 			clear_color: (0.0, 0.0, 0.0).into(),
 			shaders: Default::default(),
