@@ -6,6 +6,9 @@ pub struct Vec3 {
 }
 
 impl Vec3 {
+	pub const fn new(v0: Float, v1: Float, v2: Float) -> Self {
+		Self { v: [v0, v1, v2] }
+	}
 	pub fn x(&self) -> Float {
 		self[0]
 	}
