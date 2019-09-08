@@ -64,6 +64,7 @@ impl fmt::Display for ShaderType {
 pub enum ShaderUniform {
 	Float(Float),
 	Vec3(Vec3),
+	Vec4(Vec4),
 	I32(i32),
 	U32(u32),
 }
@@ -77,6 +78,12 @@ impl Into<ShaderUniform> for Float {
 impl Into<ShaderUniform> for Vec3 {
 	fn into(self) -> ShaderUniform {
 		ShaderUniform::Vec3(self)
+	}
+}
+
+impl Into<ShaderUniform> for Vec4 {
+	fn into(self) -> ShaderUniform {
+		ShaderUniform::Vec4(self)
 	}
 }
 

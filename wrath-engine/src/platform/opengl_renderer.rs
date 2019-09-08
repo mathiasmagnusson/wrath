@@ -137,7 +137,8 @@ impl Renderer for OpenGLRenderer {
 			gl_call("glUniform*", || {
 				match val {
 					ShaderUniform::Float(val) => gl::Uniform1f(location, val),
-					ShaderUniform::Vec3(val) => gl::Uniform3f(location, val.x(), val.y(), val.z()),
+					ShaderUniform::Vec3(val) => gl::Uniform3f(location, val[0], val[1], val[2]),
+					ShaderUniform::Vec4(val) => gl::Uniform4f(location, val[0], val[1], val[2], val[3]),
 					ShaderUniform::I32(val) => gl::Uniform1i(location, val),
 					ShaderUniform::U32(val) => gl::Uniform1ui(location, val),
 				}
