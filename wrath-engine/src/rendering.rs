@@ -64,8 +64,32 @@ impl fmt::Display for ShaderType {
 pub enum ShaderUniform {
 	Float(Float),
 	Vec3(Vec3),
-	Int(i32),
-	Uint(u32),
+	I32(i32),
+	U32(u32),
+}
+
+impl Into<ShaderUniform> for Float {
+	fn into(self) -> ShaderUniform {
+		ShaderUniform::Float(self)
+	}
+}
+
+impl Into<ShaderUniform> for Vec3 {
+	fn into(self) -> ShaderUniform {
+		ShaderUniform::Vec3(self)
+	}
+}
+
+impl Into<ShaderUniform> for i32 {
+	fn into(self) -> ShaderUniform {
+		ShaderUniform::I32(self)
+	}
+}
+
+impl Into<ShaderUniform> for u32 {
+	fn into(self) -> ShaderUniform {
+		ShaderUniform::U32(self)
+	}
 }
 
 pub struct Vertices(Vec<Float>);

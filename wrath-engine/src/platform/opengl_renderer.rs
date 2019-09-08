@@ -138,8 +138,8 @@ impl Renderer for OpenGLRenderer {
 				match val {
 					ShaderUniform::Float(val) => gl::Uniform1f(location, val),
 					ShaderUniform::Vec3(val) => gl::Uniform3f(location, val.x(), val.y(), val.z()),
-					ShaderUniform::Int(val) => gl::Uniform1i(location, val),
-					ShaderUniform::Uint(val) => gl::Uniform1ui(location, val),
+					ShaderUniform::I32(val) => gl::Uniform1i(location, val),
+					ShaderUniform::U32(val) => gl::Uniform1ui(location, val),
 				}
 			});
 		}
