@@ -49,6 +49,7 @@ struct ExampleLayer {
 	shader: ShaderHandle,
 	meshes: [MeshHandle; 2],
 	start_time: Instant,
+	rotation: Float,
 }
 
 impl ExampleLayer {
@@ -57,6 +58,7 @@ impl ExampleLayer {
 			shader: ShaderHandle::none(),
 			meshes: [MeshHandle::none(); 2],
 			start_time: Instant::now(),
+			rotation: 0.0,
 		}
 	}
 }
@@ -102,8 +104,14 @@ impl Layer for ExampleLayer {
 
 		renderer.bind_shader(self.shader);
 	}
-	fn on_update(&mut self, _dt: Duration) {
-		// println!("dt: {}", dt.as_secs_f64());
+	fn on_update(&mut self, dt: Duration) {
+		let speed = std::f32::consts::PI * 2.0;
+		if Button::E.is_pressed() {
+			self.rotation += speed * dt.as_secs_f32();
+		}
+		if Button::Q.is_pressed() {
+			self.rotation -= speed * dt.as_secs_f32();
+		}
 	}
 	fn on_render(&mut self, renderer: &mut dyn Renderer) {
 		let elapsed = self.start_time.elapsed().as_secs_f32();
@@ -113,12 +121,10 @@ impl Layer for ExampleLayer {
 			elapsed.cos(),
 		).into());
 
-		let rotation = elapsed;
-
 		renderer.set_uniform(
 			self.shader,
 			"u_rotation",
-			ShaderUniform::Float(rotation)
+			ShaderUniform::Float(self.rotation)
 		);
 
 		if Button::LShift.is_pressed() {
@@ -131,41 +137,41 @@ impl Layer for ExampleLayer {
 			}
 		}
 	}
-	fn on_detach(&mut self, renderer: &mut dyn Renderer) {
-		// renderer.delete_mesh(self.mesh);
-		renderer.delete_shader(self.shader);
-	}
-	fn on_window_resize(&mut self, size: (u32, u32)) {
-		println!("Window resized: ({}, {})", size.0, size.1);
-	}
-	fn on_text_written(&mut self, which: char) -> bool {
-		println!("{}", which);
-		false
-	}
-	fn on_key_press(&mut self, button: Button, repeat: bool) -> bool {
-		println!("Key pressed: {:?} {}", button, if repeat { "again" } else { "" });
-		false
-	}
-	fn on_key_release(&mut self, button: Button) -> bool {
-		println!("Key released: {:?}", button);
-		false
-	}
+	// fn on_detach(&mut self, renderer: &mut dyn Renderer) {
+	// 	renderer.delete_mesh(self.mesh);
+	// 	renderer.delete_shader(self.shader);
+	// }
+	// fn on_window_resize(&mut self, size: (u32, u32)) {
+	// 	println!("Window resized: ({}, {})", size.0, size.1);
+	// }
+	// fn on_text_written(&mut self, which: char) -> bool {
+	// 	println!("{}", which);
+	// 	false
+	// }
+	// fn on_key_press(&mut self, button: Button, repeat: bool) -> bool {
+	// 	println!("Key pressed: {:?} {}", button, if repeat { "again" } else { "" });
+	// 	false
+	// }
+	// fn on_key_release(&mut self, button: Button) -> bool {
+	// 	println!("Key released: {:?}", button);
+	// 	false
+	// }
 	// fn on_mouse_move(&mut self, position: (u32, u32), delta: (i32, i32)) -> bool {
 	// 	println!("Mouse moved to ({}, {}), Δ ({}, {})", position.0, position.1, delta.0, delta.1);
 	// 	false
 	// }
-	fn on_mouse_down(&mut self, button: Button) -> bool {
-		println!("Click {:?}!", button);
-		false
-	}
-	fn on_mouse_up(&mut self, button: Button) -> bool {
-		println!("Click {:?}¡", button);
-		false
-	}
-	fn on_mouse_scroll(&mut self, delta: (Float, Float)) -> bool {
-		println!("Scroll: ({}, {})", delta.0, delta.1);
-		false
-	}
+	// fn on_mouse_down(&mut self, button: Button) -> bool {
+	// 	println!("Click {:?}!", button);
+	// 	false
+	// }
+	// fn on_mouse_up(&mut self, button: Button) -> bool {
+	// 	println!("Click {:?}¡", button);
+	// 	false
+	// }
+	// fn on_mouse_scroll(&mut self, delta: (Float, Float)) -> bool {
+	// 	println!("Scroll: ({}, {})", delta.0, delta.1);
+	// 	false
+	// }
 }
 
 fn main() {

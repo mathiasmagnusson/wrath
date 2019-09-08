@@ -146,7 +146,7 @@ impl Renderer for OpenGLRenderer {
 	}
 	fn create_mesh(&mut self, vertices: &Vertices, layout: &BufferLayout, indices: &Indices) -> MeshHandle {
 		let mesh = Mesh::new(vertices, layout, indices);
-		
+
 		let handle = MeshHandle::new(self.handle_counter);
 		self.handle_counter += 1;
 		self.meshes.insert(handle, mesh);
