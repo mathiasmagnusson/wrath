@@ -1,14 +1,19 @@
 #![feature(box_syntax)]
 
 use wrath::Button;
+use wrath::BufferElement;
+use wrath::BufferLayout;
 use wrath::CallbackHandler;
 use wrath::Engine;
 use wrath::EngineProps;
+use wrath::Indices;
 use wrath::Layer;
 use wrath::LayerHandle;
+use wrath::MeshHandle;
 use wrath::Renderer;
 use wrath::ShaderHandle;
 use wrath::ShaderUniform;
+use wrath::Vertices;
 use wrath::WindowProps;
 
 use std::time::Duration;
@@ -41,12 +46,11 @@ impl CallbackHandler for Application {
 }
 
 struct ExampleLayer {
-	vertices: Vec<Float>,
-	indices: Vec<u16>,
-	va: u32,
-	vb: u32,
-	ib: u32,
+	vertices: Vertices,
+	layout: BufferLayout,
+	indices: Indices,
 	shader: ShaderHandle,
+	mesh: MeshHandle,
 	start_time: Instant,
 }
 
@@ -59,15 +63,17 @@ impl ExampleLayer {
 				 0.0,  0.5, 0.0, 0.0, 1.0, 0.0, 1.0,
 				-0.5,  0.0, 0.0, 1.0, 0.0, 0.0, 0.5,
 				 0.0, -0.5, 0.0, 1.0, 1.0, 1.0, 0.0,
-			],
+			].into(),
+			layout: BufferLayout::new(&[
+				BufferElement::Vec3,
+				BufferElement::Vec4,
+			]),
 			indices: vec![
 				0, 1, 2,
-				0, 2, 3,
-			],
-			va: 0,
-			vb: 0,
-			ib: 0,
+				0, 2, 3u16,
+			].into(),
 			shader: ShaderHandle::none(),
+			mesh: MeshHandle::none(),
 			start_time: Instant::now(),
 		}
 	}
@@ -75,53 +81,17 @@ impl ExampleLayer {
 
 impl Layer for ExampleLayer {
 	fn on_attach(&mut self, renderer: &mut dyn Renderer) {
-		unsafe {
-			renderer.create_shader(
-				std::path::Path::new("sandbox/assets/shaders/cool")
-			);
+		self.mesh = renderer.create_mesh(
+			&self.vertices,
+			&self.layout,
+			&self.indices,
+		);
 
-			use wrath::gl;
-			use std::mem::size_of;
-			use std::mem::size_of_val;
-			use std::ffi::c_void;
+		self.shader = renderer.create_shader(
+			std::path::Path::new("sandbox/assets/shaders/cool")
+		);
 
-			gl::CreateVertexArrays(1, &mut self.va);
-			gl::BindVertexArray(self.va);
-
-			gl::CreateBuffers(1, &mut self.vb);
-			gl::BindBuffer(gl::ARRAY_BUFFER, self.vb);
-
-			gl::BufferData(
-				gl::ARRAY_BUFFER,
-				size_of_val(self.vertices.as_slice()) as isize,
-				self.vertices.as_ptr() as *const c_void,
-				gl::STATIC_DRAW
-			);
-
-			// position (x, y, z)
-			gl::EnableVertexAttribArray(0);
-			gl::VertexAttribPointer(0, 3, gl::FLOAT, gl::FALSE, (size_of::<Float>() * 7) as i32, std::ptr::null_mut());
-
-			// color (r, g, b, a)
-			gl::EnableVertexAttribArray(1);
-			gl::VertexAttribPointer(1, 4, gl::FLOAT, gl::FALSE, (size_of::<Float>() * 7) as i32, (size_of::<Float>() * 3) as _);
-
-			gl::CreateBuffers(1, &mut self.ib);
-			gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, self.ib);
-
-			gl::BufferData(
-				gl::ELEMENT_ARRAY_BUFFER,
-				size_of_val(self.indices.as_slice()) as isize,
-				self.indices.as_ptr() as *const c_void,
-				gl::STATIC_DRAW,
-			);
-
-			self.shader = renderer.create_shader(
-				std::path::Path::new("sandbox/assets/shaders/cool")
-			);
-
-			renderer.bind_shader(self.shader);
-		}
+		renderer.bind_shader(self.shader);
 	}
 	fn on_update(&mut self, _dt: Duration) {
 		// println!("dt: {}", dt.as_secs_f64());
@@ -163,13 +133,8 @@ impl Layer for ExampleLayer {
 		}
 	}
 	fn on_detach(&mut self, renderer: &mut dyn Renderer) {
-		unsafe {
-			use wrath::gl;
-
-			gl::DeleteVertexArrays(1, &self.va);
-			gl::DeleteBuffers(1, &self.vb);
-			renderer.delete_shader(self.shader);
-		}
+		renderer.delete_mesh(self.mesh);
+		renderer.delete_shader(self.shader);
 	}
 	fn on_window_resize(&mut self, size: (u32, u32)) {
 		println!("Window resized: ({}, {})", size.0, size.1);

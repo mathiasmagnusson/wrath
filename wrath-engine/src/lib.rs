@@ -21,10 +21,15 @@ pub use input::InputState;
 pub use layer::Layer;
 pub use layer::LayerHandle;
 pub use layer::LayerStack;
+pub use rendering::BufferElement;
+pub use rendering::BufferLayout;
+pub use rendering::Indices;
+pub use rendering::MeshHandle;
 pub use rendering::Renderer;
 pub use rendering::ShaderHandle;
 pub use rendering::ShaderUniform;
 pub use rendering::ShaderType;
+pub use rendering::Vertices;
 pub use window::Window;
 pub use window::WindowProps;
 
