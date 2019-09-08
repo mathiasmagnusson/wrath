@@ -29,6 +29,14 @@ impl OpenGLRenderer {
 	}
 }
 
+impl Drop for OpenGLRenderer {
+	fn drop(&mut self) {
+		for shader in self.shaders.values() {
+			unsafe { gl::DeleteProgram(shader.id) };
+		}
+	}
+}
+
 impl Renderer for OpenGLRenderer {
 	fn set_clear_color(&mut self, color: Vec3) {
 		if color != self.clear_color {
