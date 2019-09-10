@@ -1,7 +1,5 @@
-use crate::Button;
-use super::Event;
-use super::EventType;
-use crate::Overlay;
+use super::{Event, EventType};
+use crate::{Button, Overlay};
 
 pub struct KeyPressedEvent {
 	is_handled: bool,
@@ -11,7 +9,11 @@ pub struct KeyPressedEvent {
 
 impl KeyPressedEvent {
 	pub fn boxed(button: Button, repeat: bool) -> Box<Self> {
-		box Self { is_handled: false, button, repeat }
+		box Self {
+			is_handled: false,
+			button,
+			repeat,
+		}
 	}
 }
 
@@ -34,7 +36,10 @@ pub struct KeyReleasedEvent {
 
 impl KeyReleasedEvent {
 	pub fn boxed(button: Button) -> Box<Self> {
-		box Self { is_handled: false, button }
+		box Self {
+			is_handled: false,
+			button,
+		}
 	}
 }
 
@@ -57,7 +62,10 @@ pub struct TextWrittenEvent {
 
 impl TextWrittenEvent {
 	pub fn boxed(which: char) -> Box<Self> {
-		box Self { is_handled: false, which }
+		box Self {
+			is_handled: false,
+			which,
+		}
 	}
 }
 

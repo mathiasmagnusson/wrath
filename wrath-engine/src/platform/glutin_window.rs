@@ -1,9 +1,4 @@
-use crate::events::*;
-use crate::input::get_mouse_position;
-use crate::Button;
-use crate::Event;
-use crate::Float;
-use crate::WindowProps;
+use crate::{events::*, input::get_mouse_position, Button, Event, Window, WindowProps};
 
 pub struct GlutinWindow {
 	inner: glutin::Window,

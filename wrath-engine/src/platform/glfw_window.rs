@@ -1,9 +1,4 @@
-use crate::events::*;
-use crate::input::get_mouse_position;
-use crate::Button;
-use crate::Event;
-use crate::Window;
-use crate::WindowProps;
+use crate::{events::*, input::get_mouse_position, Button, Event, Window, WindowProps};
 
 use std::sync::Once;
 
@@ -32,9 +27,14 @@ impl GLFWWindow {
 	pub fn new(props: WindowProps) -> Self {
 		// TODO: save this globally if needed
 
-		let (mut window, evt_recv) = glfw_handle().create_window(
-			props.size.0, props.size.1, &props.title, glfw::WindowMode::Windowed
-		).unwrap();
+		let (mut window, evt_recv) = glfw_handle()
+			.create_window(
+				props.size.0,
+				props.size.1,
+				&props.title,
+				glfw::WindowMode::Windowed,
+			)
+			.unwrap();
 
 		// TODO: OpenGL specific code should not be here
 		gl::load_with(|s| window.get_proc_address(s));
@@ -79,7 +79,7 @@ impl Window for GLFWWindow {
 
 		glfw_handle().poll_events();
 
-		for(_, event) in glfw::flush_messages(&self.evt_recv) {
+		for (_, event) in glfw::flush_messages(&self.evt_recv) {
 			match event {
 				glfw::WindowEvent::Close => {
 					events.push(WindowCloseRequestedEvent::boxed());

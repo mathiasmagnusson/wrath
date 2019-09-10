@@ -1,19 +1,13 @@
-use crate::BufferLayout;
-use crate::Indices;
-use crate::MeshHandle;
-use crate::Renderer;
-use crate::ShaderHandle;
-use crate::ShaderType;
-use crate::ShaderUniform;
-use crate::Vertices;
+use crate::{
+	BufferLayout, Indices, MeshHandle, Renderer, ShaderHandle, ShaderType, ShaderUniform, Vertices,
+};
 
 use wrath_math::Vec3;
 
 use std::collections::HashMap;
 use std::ffi::CString;
-
-use std::path::Path;
 use std::fs;
+use std::path::Path;
 
 pub struct OpenGLRenderer {
 	clear_color: Vec3,
@@ -57,17 +51,15 @@ impl OpenGLRenderer {
 
 impl Drop for OpenGLRenderer {
 	fn drop(&mut self) {
-		let shaders = self.shaders
+		let shaders = self
+			.shaders
 			.drain()
 			.map(|(_, s)| s)
 			.collect::<Vec<Shader>>();
 		for shader in shaders.into_iter() {
 			self._delete_shader(shader);
 		}
-		let meshes = self.meshes
-			.drain()
-			.map(|(_, m)| m)
-			.collect::<Vec<Mesh>>();
+		let meshes = self.meshes.drain().map(|(_, m)| m).collect::<Vec<Mesh>>();
 		for mesh in meshes {
 			self._delete_mesh(mesh);
 		}
@@ -86,7 +78,6 @@ impl Renderer for OpenGLRenderer {
 	}
 	fn create_shader(&mut self, path: &Path) -> ShaderHandle {
 		let (vertex, fragment) = read_shader_source(path);
-		
 		let vertex = compile_shader(&vertex, ShaderType::Vertex);
 		let fragment = compile_shader(&fragment, ShaderType::Fragment);
 
@@ -100,7 +91,9 @@ impl Renderer for OpenGLRenderer {
 		handle
 	}
 	fn bind_shader(&mut self, handle: ShaderHandle) {
-		if handle == self.bound_shader { return };
+		if handle == self.bound_shader {
+			return;
+		};
 		let shader = &self.shaders[&handle];
 		unsafe {
 			gl::UseProgram(shader.id);
@@ -108,25 +101,18 @@ impl Renderer for OpenGLRenderer {
 		self.bound_shader = handle;
 	}
 	fn delete_shader(&mut self, handle: ShaderHandle) {
-		let shader = self.shaders.remove(&handle)
-			.expect("Unknown shader");
+		let shader = self.shaders.remove(&handle).expect("Unknown shader");
 		self._delete_shader(shader);
 	}
 	fn set_uniform(&mut self, handle: ShaderHandle, name: &str, val: ShaderUniform) {
 		unsafe {
-			let shader = self.shaders.get_mut(&handle)
-				.expect("Unknown shader");
+			let shader = self.shaders.get_mut(&handle).expect("Unknown shader");
 
 			if !shader.uniform_cache.contains_key(name) {
 				shader.uniform_cache.insert(
 					name.into(),
 					gl_call("getGetUniformLocation", || {
-						gl::GetUniformLocation(
-							shader.id,
-							CString::new(name)
-								.unwrap()
-								.as_ptr()
-						)
+						gl::GetUniformLocation(shader.id, CString::new(name).unwrap().as_ptr())
 					}),
 				);
 			}
@@ -134,18 +120,21 @@ impl Renderer for OpenGLRenderer {
 
 			self.bind_shader(handle);
 
-			gl_call("glUniform*", || {
-				match val {
-					ShaderUniform::Float(val) => gl::Uniform1f(location, val),
-					ShaderUniform::Vec3(val) => gl::Uniform3f(location, val[0], val[1], val[2]),
-					ShaderUniform::Vec4(val) => gl::Uniform4f(location, val[0], val[1], val[2], val[3]),
-					ShaderUniform::I32(val) => gl::Uniform1i(location, val),
-					ShaderUniform::U32(val) => gl::Uniform1ui(location, val),
-				}
+			gl_call("glUniform*", || match val {
+				ShaderUniform::Float(val) => gl::Uniform1f(location, val),
+				ShaderUniform::Vec3(val) => gl::Uniform3f(location, val[0], val[1], val[2]),
+				ShaderUniform::Vec4(val) => gl::Uniform4f(location, val[0], val[1], val[2], val[3]),
+				ShaderUniform::I32(val) => gl::Uniform1i(location, val),
+				ShaderUniform::U32(val) => gl::Uniform1ui(location, val),
 			});
 		}
 	}
-	fn create_mesh(&mut self, vertices: &Vertices, layout: &BufferLayout, indices: &Indices) -> MeshHandle {
+	fn create_mesh(
+		&mut self,
+		vertices: &Vertices,
+		layout: &BufferLayout,
+		indices: &Indices,
+	) -> MeshHandle {
 		let mesh = Mesh::new(vertices, layout, indices);
 
 		let handle = MeshHandle::new(self.handle_counter);
@@ -155,7 +144,9 @@ impl Renderer for OpenGLRenderer {
 		handle
 	}
 	fn bind_mesh(&mut self, handle: MeshHandle) {
-		if handle == self.bound_mesh { return };
+		if handle == self.bound_mesh {
+			return;
+		};
 		let mesh = &self.meshes[&handle];
 		unsafe {
 			gl_call("bind mesh", || {
@@ -167,7 +158,9 @@ impl Renderer for OpenGLRenderer {
 		self.bound_mesh = handle;
 	}
 	fn delete_mesh(&mut self, handle: MeshHandle) {
-		let mesh = self.meshes.remove(&handle)
+		let mesh = self
+			.meshes
+			.remove(&handle)
 			.expect("Tried to delete unknown mesh");
 		self._delete_mesh(mesh);
 	}
@@ -206,15 +199,15 @@ impl Shader {
 
 fn compile_shader(src: &str, type_: ShaderType) -> PartialShader {
 	unsafe {
-		let id = gl_call("glCreateShader", || gl::CreateShader(match type_ {
-			ShaderType::Vertex => gl::VERTEX_SHADER,
-			ShaderType::Fragment => gl::FRAGMENT_SHADER,
-		}));
+		let id = gl_call("glCreateShader", || {
+			gl::CreateShader(match type_ {
+				ShaderType::Vertex => gl::VERTEX_SHADER,
+				ShaderType::Fragment => gl::FRAGMENT_SHADER,
+			})
+		});
 		let ptr = src.as_ptr() as *const i8;
 		let len = src.len() as i32;
-		gl_call("glShaderSource", || {
-			gl::ShaderSource(id, 1, &ptr, &len)
-		});
+		gl_call("glShaderSource", || gl::ShaderSource(id, 1, &ptr, &len));
 		gl::CompileShader(id);
 
 		let mut success = 0;
@@ -294,8 +287,10 @@ fn read_shader_source(path: &Path) -> (String, String) {
 
 		(vertex, fragment)
 	} else {
-		let source = fs::read_to_string(path)
-			.expect(&format!("Error reading shader source file at {}", path.display()));
+		let source = fs::read_to_string(path).expect(&format!(
+			"Error reading shader source file at {}",
+			path.display()
+		));
 
 		let mut vertex = String::new();
 		let mut fragment = String::new();
@@ -337,7 +332,6 @@ impl Mesh {
 	pub fn new(vertices: &Vertices, layout: &BufferLayout, indices: &Indices) -> Self {
 		unsafe {
 			let mut va = 0;
-		
 			gl::CreateVertexArrays(1, &mut va);
 			gl::BindVertexArray(va);
 
@@ -387,10 +381,10 @@ impl Mesh {
 				ib,
 				index_count: indices.len() as i32,
 				index_type: match indices {
-					Indices::U8 (_) => gl::UNSIGNED_BYTE,
+					Indices::U8(_) => gl::UNSIGNED_BYTE,
 					Indices::U16(_) => gl::UNSIGNED_SHORT,
 					Indices::U32(_) => gl::UNSIGNED_INT,
-				}
+				},
 			}
 		}
 	}
@@ -400,23 +394,29 @@ fn gl_call<T, F: FnOnce() -> T>(ident: &'static str, f: F) -> T {
 	if cfg!(debug_assertions) {
 		unsafe {
 			loop {
-				if gl::GetError() == gl::NO_ERROR { break };
+				if gl::GetError() == gl::NO_ERROR {
+					break;
+				};
 			}
 
 			let ret = f();
 
 			let err = gl::GetError();
 			if err != gl::NO_ERROR {
-				panic!("Open gl error at {}: {}", ident, match err {
-					gl::INVALID_ENUM => "INVALID_ENUM",
-					gl::INVALID_VALUE => "INVALID_VALUE",
-					gl::INVALID_OPERATION => "INVALID_OPERATION",
-					gl::INVALID_FRAMEBUFFER_OPERATION => "INVALID_FRAMEBUFFER_OPERATION",
-					gl::OUT_OF_MEMORY => "OUT_OF_MEMORY",
-					gl::STACK_UNDERFLOW => "STACK_UNDERFLOW",
-					gl::STACK_OVERFLOW => "STACK_OVERFLOW",
-					_ => "undefined",
-				});
+				panic!(
+					"Open gl error at {}: {}",
+					ident,
+					match err {
+						gl::INVALID_ENUM => "INVALID_ENUM",
+						gl::INVALID_VALUE => "INVALID_VALUE",
+						gl::INVALID_OPERATION => "INVALID_OPERATION",
+						gl::INVALID_FRAMEBUFFER_OPERATION => "INVALID_FRAMEBUFFER_OPERATION",
+						gl::OUT_OF_MEMORY => "OUT_OF_MEMORY",
+						gl::STACK_UNDERFLOW => "STACK_UNDERFLOW",
+						gl::STACK_OVERFLOW => "STACK_OVERFLOW",
+						_ => "undefined",
+					}
+				);
 			}
 			ret
 		}

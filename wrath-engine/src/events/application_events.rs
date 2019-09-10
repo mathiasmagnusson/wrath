@@ -1,5 +1,4 @@
-use super::Event;
-use super::EventType;
+use super::{Event, EventType};
 use crate::Overlay;
 
 pub struct WindowCloseRequestedEvent;

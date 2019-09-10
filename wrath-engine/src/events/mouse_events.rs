@@ -1,7 +1,5 @@
-use crate::Button;
-use super::Event;
-use super::EventType;
-use crate::Overlay;
+use super::{Event, EventType};
+use crate::{Button, Overlay};
 
 use wrath_math::Float;
 
@@ -12,7 +10,10 @@ pub struct MouseDownEvent {
 
 impl MouseDownEvent {
 	pub fn boxed(button: Button) -> Box<Self> {
-		box Self { is_handled: false, button }
+		box Self {
+			is_handled: false,
+			button,
+		}
 	}
 }
 
@@ -35,7 +36,10 @@ pub struct MouseUpEvent {
 
 impl MouseUpEvent {
 	pub fn boxed(button: Button) -> Box<Self> {
-		box Self { is_handled: false, button }
+		box Self {
+			is_handled: false,
+			button,
+		}
 	}
 }
 
@@ -59,7 +63,11 @@ pub struct MouseMoveEvent {
 
 impl MouseMoveEvent {
 	pub fn boxed(position: (u32, u32), delta: (i32, i32)) -> Box<Self> {
-		box Self { is_handled: false, position, delta }
+		box Self {
+			is_handled: false,
+			position,
+			delta,
+		}
 	}
 }
 
@@ -82,7 +90,10 @@ pub struct MouseScrolledEvent {
 
 impl MouseScrolledEvent {
 	pub fn boxed(delta: (Float, Float)) -> Box<Self> {
-		box Self { is_handled: false, delta }
+		box Self {
+			is_handled: false,
+			delta,
+		}
 	}
 }
 
@@ -97,4 +108,3 @@ impl Event for MouseScrolledEvent {
 		EventType::MouseScrolled
 	}
 }
-

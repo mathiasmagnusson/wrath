@@ -1,14 +1,9 @@
-use std::time::Instant;
+use crate::{
+	input::INPUT_STATE, window, Button, Overlay, OverlayHandle, OverlayStack, Renderer, Window,
+	WindowProps,
+};
 
-use crate::input::INPUT_STATE;
-use crate::Button;
-use crate::Overlay;
-use crate::OverlayHandle;
-use crate::OverlayStack;
-use crate::Renderer;
-use crate::window;
-use crate::Window;
-use crate::WindowProps;
+use std::time::Instant;
 
 pub struct Engine {
 	window: Box<dyn Window>,
@@ -64,13 +59,16 @@ impl Engine {
 	// 	&mut self.overlay_stack
 	// }
 	pub fn push_overlay_back(&mut self, overlay: Box<dyn Overlay>) -> OverlayHandle {
-		self.overlay_stack.push_back(overlay, self.renderer.as_mut())
+		self.overlay_stack
+			.push_back(overlay, self.renderer.as_mut())
 	}
 	pub fn push_overlay_front(&mut self, overlay: Box<dyn Overlay>) -> OverlayHandle {
-		self.overlay_stack.push_front(overlay, self.renderer.as_mut())
+		self.overlay_stack
+			.push_front(overlay, self.renderer.as_mut())
 	}
 	pub fn remove_overlay(&mut self, handle: OverlayHandle) -> bool {
-		self.overlay_stack.remove_overlay(handle, self.renderer.as_mut())
+		self.overlay_stack
+			.remove_overlay(handle, self.renderer.as_mut())
 	}
 	pub fn renderer(&mut self) -> &mut dyn Renderer {
 		self.renderer.as_mut()

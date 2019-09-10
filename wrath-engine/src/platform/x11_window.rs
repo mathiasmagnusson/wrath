@@ -1,11 +1,6 @@
-use std::ffi::CString;
+use crate::{events::*, input::get_mouse_position, Button, Event, Float, WindowProps};
 
-use crate::events::*;
-use crate::input::get_mouse_position;
-use crate::Button;
-use crate::Event;
-use crate::Float;
-use crate::WindowProps;
+use std::ffi::CString;
 
 pub struct X11Window {
 	display: *mut x11::xlib::Display,
@@ -21,10 +16,16 @@ impl X11Window {
 			use x11::xlib::*;
 
 			let display = XOpenDisplay(std::ptr::null());
-			assert!(display != std::ptr::null_mut(), "XOpenDisplay returned null");
+			assert!(
+				display != std::ptr::null_mut(),
+				"XOpenDisplay returned null"
+			);
 
 			let screen = XDefaultScreenOfDisplay(display);
-			assert!(display != std::ptr::null_mut(), "XDefaultScreenOfDisplay returned null");
+			assert!(
+				display != std::ptr::null_mut(),
+				"XDefaultScreenOfDisplay returned null"
+			);
 
 			let screen_id = XDefaultScreen(display);
 			// assert!();
@@ -34,18 +35,32 @@ impl X11Window {
 			let root = XRootWindowOfScreen(screen);
 			let x = 0;
 			let y = 0;
-			let window = XCreateSimpleWindow(display, root, x, y, props.size.0, props.size.1, 1, white, black);
+			let window = XCreateSimpleWindow(
+				display,
+				root,
+				x,
+				y,
+				props.size.0,
+				props.size.1,
+				1,
+				white,
+				black,
+			);
 
-			let title = CString::new(props.title.clone()).expect("Window title had a null byte in it");
+			let title =
+				CString::new(props.title.clone()).expect("Window title had a null byte in it");
 
 			XStoreName(display, window, title.as_ptr());
 			XSetIconName(display, window, title.as_ptr());
 
-			XSelectInput(display, window, KeyPressMask | KeyReleaseMask | KeymapStateMask);
+			XSelectInput(
+				display,
+				window,
+				KeyPressMask | KeyReleaseMask | KeymapStateMask,
+			);
 
 			XClearWindow(display, window);
 			XMapRaised(display, window);
-		
 			Self {
 				display,
 				window,
@@ -73,7 +88,8 @@ impl crate::Window for X11Window {
 		self.title = title;
 		unsafe {
 			use x11::xlib::*;
-			let title = CString::new(self.title.clone()).expect("Window title had a null byte in it");
+			let title =
+				CString::new(self.title.clone()).expect("Window title had a null byte in it");
 			XStoreName(self.display, self.window, title.as_ptr());
 			XSetIconName(self.display, self.window, title.as_ptr());
 		}
@@ -93,32 +109,29 @@ impl crate::Window for X11Window {
 		unsafe {
 			use x11::xlib;
 
-			let mut event = xlib::XEvent {
-				type_: 0,
-			};
+			let mut event = xlib::XEvent { type_: 0 };
 
 			xlib::XNextEvent(self.display, &mut event as *mut xlib::XEvent);
 
 			match event.type_ {
 				xlib::KeymapNotify => {
-					xlib::XRefreshKeyboardMapping(
-						&mut event.mapping as *mut xlib::XMappingEvent
-					);
-				},
+					xlib::XRefreshKeyboardMapping(&mut event.mapping as *mut xlib::XMappingEvent);
+				}
 				xlib::KeyPress => {
 					let mut typed = [0u8; 25];
 					let mut keysym: xlib::KeySym = 0;
 					let len = xlib::XLookupString(
 						&mut event.key as *mut xlib::XKeyEvent,
-						typed.as_mut_ptr() as *mut i8, typed.len() as _,
+						typed.as_mut_ptr() as *mut i8,
+						typed.len() as _,
 						&mut keysym as *mut xlib::KeySym,
-						std::ptr::null_mut()
+						std::ptr::null_mut(),
 					);
 
 					let button = convert_key_event(keysym);
 					events.push(KeyPressedEvent::boxed(button, button.is_pressed()));
 				}
-				_ => {},
+				_ => {}
 			}
 		}
 

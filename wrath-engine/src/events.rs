@@ -1,3 +1,5 @@
+use crate::Overlay;
+
 mod application_events;
 mod keyboard_events;
 mod mouse_events;
@@ -5,8 +7,6 @@ mod mouse_events;
 pub use application_events::*;
 pub use keyboard_events::*;
 pub use mouse_events::*;
-
-use crate::Overlay;
 
 pub trait Event {
 	fn is_handled(&self) -> bool;
