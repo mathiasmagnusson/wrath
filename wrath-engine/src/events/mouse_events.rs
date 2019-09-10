@@ -1,7 +1,7 @@
 use crate::Button;
 use super::Event;
 use super::EventType;
-use crate::Layer;
+use crate::Overlay;
 
 use wrath_math::Float;
 
@@ -20,8 +20,8 @@ impl Event for MouseDownEvent {
 	fn is_handled(&self) -> bool {
 		self.is_handled
 	}
-	fn dispatch(&mut self, layer: &mut dyn Layer) {
-		self.is_handled = layer.on_mouse_down(self.button);
+	fn dispatch(&mut self, overlay: &mut dyn Overlay) {
+		self.is_handled = overlay.on_mouse_down(self.button);
 	}
 	fn event_type(&self) -> EventType {
 		EventType::MouseDown
@@ -43,8 +43,8 @@ impl Event for MouseUpEvent {
 	fn is_handled(&self) -> bool {
 		self.is_handled
 	}
-	fn dispatch(&mut self, layer: &mut dyn Layer) {
-		self.is_handled = layer.on_mouse_up(self.button);
+	fn dispatch(&mut self, overlay: &mut dyn Overlay) {
+		self.is_handled = overlay.on_mouse_up(self.button);
 	}
 	fn event_type(&self) -> EventType {
 		EventType::MouseUp
@@ -67,8 +67,8 @@ impl Event for MouseMoveEvent {
 	fn is_handled(&self) -> bool {
 		self.is_handled
 	}
-	fn dispatch(&mut self, layer: &mut dyn Layer) {
-		self.is_handled = layer.on_mouse_move(self.position, self.delta);
+	fn dispatch(&mut self, overlay: &mut dyn Overlay) {
+		self.is_handled = overlay.on_mouse_move(self.position, self.delta);
 	}
 	fn event_type(&self) -> EventType {
 		EventType::MouseMove
@@ -90,8 +90,8 @@ impl Event for MouseScrolledEvent {
 	fn is_handled(&self) -> bool {
 		self.is_handled
 	}
-	fn dispatch(&mut self, layer: &mut dyn Layer) {
-		self.is_handled = layer.on_mouse_scroll(self.delta);
+	fn dispatch(&mut self, overlay: &mut dyn Overlay) {
+		self.is_handled = overlay.on_mouse_scroll(self.delta);
 	}
 	fn event_type(&self) -> EventType {
 		EventType::MouseScrolled

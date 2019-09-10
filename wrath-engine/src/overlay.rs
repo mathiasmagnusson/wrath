@@ -8,57 +8,57 @@ use std::time::Duration;
 
 use wrath_math::Float;
 
-pub struct LayerStack {
-	inner: VecDeque<(Box<dyn Layer>, LayerHandle)>,
-	handle_counter: LayerHandle,
+pub struct OverlayStack {
+	inner: VecDeque<(Box<dyn Overlay>, OverlayHandle)>,
+	handle_counter: OverlayHandle,
 }
 
-impl LayerStack {
+impl OverlayStack {
 	pub fn new() -> Self {
 		Self {
 			inner: VecDeque::default(),
-			handle_counter: LayerHandle(1),
+			handle_counter: OverlayHandle(1),
 		}
 	}
 	pub fn submit(&mut self, mut event: Box<dyn Event>) {
-		for layer in self.inner.iter_mut() {
-			event.dispatch(layer.0.as_mut());
+		for overlay in self.inner.iter_mut() {
+			event.dispatch(overlay.0.as_mut());
 			if event.is_handled() {
 				break;
 			}
 		}
 	}
 	pub fn call_update(&mut self, dt: Duration) {
-		for layer in self.inner.iter_mut() {
-			layer.0.on_update(dt);
+		for overlay in self.inner.iter_mut() {
+			overlay.0.on_update(dt);
 		}
 	}
 	pub fn call_render(&mut self, renderer: &mut dyn Renderer) {
-		for layer in self.inner.iter_mut() {
-			layer.0.on_render(renderer);
+		for overlay in self.inner.iter_mut() {
+			overlay.0.on_render(renderer);
 		}
 	}
-	pub fn push_back(&mut self, mut layer: Box<dyn Layer>, renderer: &mut dyn Renderer) -> LayerHandle {
-		layer.on_attach(renderer);
+	pub fn push_back(&mut self, mut overlay: Box<dyn Overlay>, renderer: &mut dyn Renderer) -> OverlayHandle {
+		overlay.on_attach(renderer);
 
 		let handle = self.handle_counter;
 		self.handle_counter += 1;
-		self.inner.push_back((layer, handle));
+		self.inner.push_back((overlay, handle));
 		handle
 	}
-	pub fn push_front(&mut self, mut layer: Box<dyn Layer>, renderer: &mut dyn Renderer) -> LayerHandle {
-		layer.on_attach(renderer);
+	pub fn push_front(&mut self, mut overlay: Box<dyn Overlay>, renderer: &mut dyn Renderer) -> OverlayHandle {
+		overlay.on_attach(renderer);
 
 		let handle = self.handle_counter;
 		self.handle_counter += 1;
-		self.inner.push_front((layer, handle));
+		self.inner.push_front((overlay, handle));
 		handle
 	}
-	pub fn remove_layer(&mut self, handle: LayerHandle, renderer: &mut dyn Renderer) -> bool {
+	pub fn remove_overlay(&mut self, handle: OverlayHandle, renderer: &mut dyn Renderer) -> bool {
 		for i in 0..self.inner.len() {
 			if self.inner[i].1 == handle {
-				if let Some((mut layer, _handle)) = self.inner.remove(i) {
-					layer.on_detach(renderer);
+				if let Some((mut overlay, _handle)) = self.inner.remove(i) {
+					overlay.on_detach(renderer);
 				}
 				return true;
 			}
@@ -68,22 +68,22 @@ impl LayerStack {
 }
 
 #[derive(PartialEq, Eq, Clone, Copy)]
-pub struct LayerHandle(u32);
+pub struct OverlayHandle(u32);
 
-impl LayerHandle {
+impl OverlayHandle {
 	pub fn none() -> Self {
-		LayerHandle(0)
+		OverlayHandle(0)
 	}
 }
 
-impl AddAssign<u32> for LayerHandle {
+impl AddAssign<u32> for OverlayHandle {
 	fn add_assign(&mut self, rhs: u32) {
 		self.0 += rhs;
 	}
 }
 
 #[allow(unused_variables)]
-pub trait Layer {
+pub trait Overlay {
 	fn on_attach(&mut self, renderer: &mut dyn Renderer) {}
 	fn on_detach(&mut self, renderer: &mut dyn Renderer) {}
 	fn on_update(&mut self, dt: Duration) {}

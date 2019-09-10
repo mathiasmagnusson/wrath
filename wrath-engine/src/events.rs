@@ -6,11 +6,11 @@ pub use application_events::*;
 pub use keyboard_events::*;
 pub use mouse_events::*;
 
-use crate::Layer;
+use crate::Overlay;
 
 pub trait Event {
 	fn is_handled(&self) -> bool;
-	fn dispatch(&mut self, layer: &mut dyn Layer);
+	fn dispatch(&mut self, overlay: &mut dyn Overlay);
 	fn event_type(&self) -> EventType;
 }
 

@@ -2,9 +2,9 @@ use std::time::Instant;
 
 use crate::input::INPUT_STATE;
 use crate::Button;
-use crate::Layer;
-use crate::LayerHandle;
-use crate::LayerStack;
+use crate::Overlay;
+use crate::OverlayHandle;
+use crate::OverlayStack;
 use crate::Renderer;
 use crate::window;
 use crate::Window;
@@ -13,7 +13,7 @@ use crate::WindowProps;
 pub struct Engine {
 	window: Box<dyn Window>,
 	is_running: bool,
-	layer_stack: LayerStack,
+	overlay_stack: OverlayStack,
 	last_update: Instant,
 	renderer: Box<dyn Renderer>,
 }
@@ -25,13 +25,13 @@ impl Engine {
 		let mut renderer = box crate::platform::opengl_renderer::OpenGLRenderer::new();
 		renderer.set_clear_color((0.0, 0.06, 0.12).into());
 
-		let mut layer_stack = LayerStack::new();
-		layer_stack.push_back(box InputPollingUpdateLayer, renderer.as_mut());
+		let mut overlay_stack = OverlayStack::new();
+		overlay_stack.push_back(box InputPollingUpdateOverlay, renderer.as_mut());
 
 		Self {
 			window,
 			is_running: true,
-			layer_stack,
+			overlay_stack,
 			last_update: Instant::now(),
 			renderer,
 		}
@@ -45,13 +45,13 @@ impl Engine {
 			if self.window.close_requested() {
 				self.is_running = false;
 			}
-			self.layer_stack.submit(event);
+			self.overlay_stack.submit(event);
 		}
 
-		self.layer_stack.call_update(dt);
+		self.overlay_stack.call_update(dt);
 
 		self.renderer.clear();
-		self.layer_stack.call_render(self.renderer.as_mut());
+		self.overlay_stack.call_render(self.renderer.as_mut());
 		self.window.swap_buffers();
 	}
 	pub fn is_running(&self) -> bool {
@@ -60,17 +60,17 @@ impl Engine {
 	pub fn exit(&mut self) {
 		self.is_running = false;
 	}
-	// pub fn layer_stack(&mut self) -> &mut LayerStack {
-	// 	&mut self.layer_stack
+	// pub fn overlay_stack(&mut self) -> &mut OverlayStack {
+	// 	&mut self.overlay_stack
 	// }
-	pub fn push_layer_back(&mut self, layer: Box<dyn Layer>) -> LayerHandle {
-		self.layer_stack.push_back(layer, self.renderer.as_mut())
+	pub fn push_overlay_back(&mut self, overlay: Box<dyn Overlay>) -> OverlayHandle {
+		self.overlay_stack.push_back(overlay, self.renderer.as_mut())
 	}
-	pub fn push_layer_front(&mut self, layer: Box<dyn Layer>) -> LayerHandle {
-		self.layer_stack.push_front(layer, self.renderer.as_mut())
+	pub fn push_overlay_front(&mut self, overlay: Box<dyn Overlay>) -> OverlayHandle {
+		self.overlay_stack.push_front(overlay, self.renderer.as_mut())
 	}
-	pub fn remove_layer(&mut self, handle: LayerHandle) -> bool {
-		self.layer_stack.remove_layer(handle, self.renderer.as_mut())
+	pub fn remove_overlay(&mut self, handle: OverlayHandle) -> bool {
+		self.overlay_stack.remove_overlay(handle, self.renderer.as_mut())
 	}
 	pub fn renderer(&mut self) -> &mut dyn Renderer {
 		self.renderer.as_mut()
@@ -81,9 +81,9 @@ pub struct EngineProps {
 	pub window_props: WindowProps,
 }
 
-struct InputPollingUpdateLayer;
+struct InputPollingUpdateOverlay;
 
-impl Layer for InputPollingUpdateLayer {
+impl Overlay for InputPollingUpdateOverlay {
 	fn on_mouse_move(&mut self, position: (u32, u32), _delta: (i32, i32)) -> bool {
 		unsafe {
 			INPUT_STATE.mouse_position = position;

@@ -1,7 +1,7 @@
 #![feature(box_syntax)]
 
-// mod example_layer;
-// use example_layer::ExampleLayer;
+// mod example_overlay;
+// use example_overlay::ExampleOverlay;
 
 use std::time::Duration;
 use std::path::Path;
@@ -16,26 +16,26 @@ fn main() {
 }
 
 struct Application {
-	ex_layer: wrath::LayerHandle,
+	ex_overlay: wrath::OverlayHandle,
 }
 
 impl Application {
 	fn new() -> Self {
 		Self {
-			ex_layer: wrath::LayerHandle::none(),
+			ex_overlay: wrath::OverlayHandle::none(),
 		}
 	}
 }
 
 impl wrath::CallbackHandler for Application {
 	fn on_create(&mut self, engine: &mut wrath::Engine) {
-		self.ex_layer = engine.push_layer_front(box SnakeLayer::new());
+		self.ex_overlay = engine.push_overlay_front(box SnakeOverlay::new());
 	}
 	fn on_update(&mut self, _engine: &mut wrath::Engine) {
 		// do shit
 	}
 	fn on_exit(&mut self, engine: &mut wrath::Engine) {
-		engine.remove_layer(self.ex_layer);
+		engine.remove_overlay(self.ex_overlay);
 	}
 }
 
@@ -44,7 +44,7 @@ const ROWS: u32 = 10;
 const SNAKE_COLOR: wrath_math::Vec4 = wrath_math::Vec4::new(0.0, 1.0, 0.0, 1.0);
 const FRUIT_COLOR: wrath_math::Vec4 = wrath_math::Vec4::new(1.0, 0.0, 0.0, 1.0);
 
-struct SnakeLayer {
+struct SnakeOverlay {
 	cube_mesh: wrath::MeshHandle,
 	flat_cube_shader: wrath::ShaderHandle,
 	elapsed: Duration,
@@ -55,7 +55,7 @@ struct SnakeLayer {
 	fruit: (u32, u32),
 }
 
-impl SnakeLayer {
+impl SnakeOverlay {
 	fn new() -> Self {
 		Self {
 			cube_mesh: wrath::MeshHandle::none(),
@@ -121,7 +121,7 @@ impl SnakeLayer {
 	}
 }
 
-impl wrath::Layer for SnakeLayer {
+impl wrath::Overlay for SnakeOverlay {
 	fn on_update(&mut self, dt: Duration) {
 		if !self.turned {
 			if wrath::Button::ArrowRight.is_pressed() {

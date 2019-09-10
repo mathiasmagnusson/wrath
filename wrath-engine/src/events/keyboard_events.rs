@@ -1,7 +1,7 @@
 use crate::Button;
 use super::Event;
 use super::EventType;
-use crate::Layer;
+use crate::Overlay;
 
 pub struct KeyPressedEvent {
 	is_handled: bool,
@@ -19,8 +19,8 @@ impl Event for KeyPressedEvent {
 	fn is_handled(&self) -> bool {
 		self.is_handled
 	}
-	fn dispatch(&mut self, layer: &mut dyn Layer) {
-		self.is_handled = layer.on_key_press(self.button, self.repeat);
+	fn dispatch(&mut self, overlay: &mut dyn Overlay) {
+		self.is_handled = overlay.on_key_press(self.button, self.repeat);
 	}
 	fn event_type(&self) -> EventType {
 		EventType::KeyPressed
@@ -42,8 +42,8 @@ impl Event for KeyReleasedEvent {
 	fn is_handled(&self) -> bool {
 		self.is_handled
 	}
-	fn dispatch(&mut self, layer: &mut dyn Layer) {
-		self.is_handled = layer.on_key_release(self.button);
+	fn dispatch(&mut self, overlay: &mut dyn Overlay) {
+		self.is_handled = overlay.on_key_release(self.button);
 	}
 	fn event_type(&self) -> EventType {
 		EventType::KeyReleased
@@ -65,8 +65,8 @@ impl Event for TextWrittenEvent {
 	fn is_handled(&self) -> bool {
 		self.is_handled
 	}
-	fn dispatch(&mut self, layer: &mut dyn Layer) {
-		self.is_handled = layer.on_text_written(self.which);
+	fn dispatch(&mut self, overlay: &mut dyn Overlay) {
+		self.is_handled = overlay.on_text_written(self.which);
 	}
 	fn event_type(&self) -> EventType {
 		EventType::TextWritten

@@ -2,7 +2,7 @@ use wrath::Button;
 use wrath::BufferElement;
 use wrath::BufferLayout;
 use wrath::Indices;
-use wrath::Layer;
+use wrath::Overlay;
 use wrath::MeshHandle;
 use wrath::Renderer;
 use wrath::ShaderHandle;
@@ -14,7 +14,7 @@ use std::time::Instant;
 
 use wrath_math::Float;
 
-pub struct ExampleLayer {
+pub struct ExampleOverlay {
 	shader: ShaderHandle,
 	meshes: [MeshHandle; 2],
 	start_time: Instant,
@@ -22,7 +22,7 @@ pub struct ExampleLayer {
 	rev: bool,
 }
 
-impl ExampleLayer {
+impl ExampleOverlay {
 	pub fn new() -> Self {
 		Self {
 			shader: ShaderHandle::none(),
@@ -34,7 +34,7 @@ impl ExampleLayer {
 	}
 }
 
-impl Layer for ExampleLayer {
+impl Overlay for ExampleOverlay {
 	fn on_attach(&mut self, renderer: &mut dyn Renderer) {
 		let layout = BufferLayout::new(&[
 			BufferElement::Vec3,
