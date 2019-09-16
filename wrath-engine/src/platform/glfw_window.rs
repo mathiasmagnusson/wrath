@@ -25,8 +25,6 @@ pub struct GLFWWindow {
 
 impl GLFWWindow {
 	pub fn new(props: WindowProps) -> Self {
-		// TODO: save this globally if needed
-
 		let (mut window, evt_recv) = glfw_handle()
 			.create_window(
 				props.size.0,

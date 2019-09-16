@@ -7,6 +7,6 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-glfw = "0.32.0"
-gl = "0.13.0"
+gl = "0.13"
 wrath-math = { path = "../wrath-math" }
+glutin = "0.21"

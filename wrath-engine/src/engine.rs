@@ -1,6 +1,6 @@
 use crate::{
-	input::INPUT_STATE, window, Button, Overlay, OverlayHandle, OverlayStack, Renderer, Window,
-	WindowProps,
+	input::INPUT_STATE, window, Button, CallbackHandler, Overlay, OverlayHandle, OverlayStack,
+	Renderer, Window, WindowProps,
 };
 
 use std::time::Instant;
@@ -31,7 +31,7 @@ impl Engine {
 			renderer,
 		}
 	}
-	pub fn update(&mut self) {
+	pub fn update(&mut self, handler: &mut dyn CallbackHandler) {
 		let now = Instant::now();
 		let dt = now - self.last_update;
 		self.last_update = now;
@@ -42,6 +42,8 @@ impl Engine {
 			}
 			self.overlay_stack.submit(event);
 		}
+
+		handler.on_update(self);
 
 		self.overlay_stack.call_update(dt);
 

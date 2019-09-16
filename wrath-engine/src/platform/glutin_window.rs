@@ -1,7 +1,9 @@
 use crate::{events::*, input::get_mouse_position, Button, Event, Window, WindowProps};
 
+use wrath_math::Float;
+
 pub struct GlutinWindow {
-	inner: glutin::Window,
+	win_ctx: glutin::WindowedContext<glutin::PossiblyCurrent>,
 	evt_loop: glutin::EventsLoop,
 	title: String,
 	close_requested: bool,
@@ -10,12 +12,21 @@ pub struct GlutinWindow {
 impl GlutinWindow {
 	pub fn new(props: WindowProps) -> Self {
 		let el = glutin::EventsLoop::new();
-		let win = glutin::Window::new(&el).unwrap();
-		win.set_inner_size(glutin::dpi::LogicalSize::from(props.size));
-		win.set_title(&props.title);
+		let wb = glutin::WindowBuilder::new();
+		let win_ctx = glutin::ContextBuilder::new()
+			.build_windowed(wb, &el)
+			.unwrap();
+
+		let win_ctx = unsafe { win_ctx.make_current().unwrap() };
+
+		win_ctx.window().set_inner_size(props.size.into());
+		win_ctx.window().set_title(&props.title);
+
+		// TODO: we dun wanna do dis here mann
+		gl::load_with(|s| win_ctx.get_proc_address(s) as _);
 
 		Self {
-			inner: win,
+			win_ctx,
 			evt_loop: el,
 			title: props.title,
 			close_requested: false,
@@ -23,7 +34,7 @@ impl GlutinWindow {
 	}
 }
 
-impl crate::Window for GlutinWindow {
+impl Window for GlutinWindow {
 	fn set_title(&mut self, title: String) {
 		self.title = title;
 	}
@@ -31,14 +42,19 @@ impl crate::Window for GlutinWindow {
 		&self.title
 	}
 	fn get_size(&self) -> (u32, u32) {
-		self.inner.get_inner_size().unwrap().into()
+		self.win_ctx.window().get_inner_size().unwrap().into()
+	}
+	fn swap_buffers(&mut self) {
+		self.win_ctx.swap_buffers().unwrap()
 	}
 	fn update(&mut self) -> Vec<Box<dyn Event>> {
 		let mut events: Vec<Box<dyn Event>> = vec![];
+		let mut close_requested = false;
 
 		self.evt_loop.poll_events(|event| match event {
 			glutin::Event::WindowEvent { event, .. } => match event {
 				glutin::WindowEvent::CloseRequested => {
+					close_requested = true;
 					events.push(WindowCloseRequestedEvent::boxed())
 				}
 				glutin::WindowEvent::Resized(size) => {
@@ -100,7 +116,7 @@ impl crate::Window for GlutinWindow {
 							glutin::VirtualKeyCode::RBracket => BracketRight,
 							glutin::VirtualKeyCode::Backslash => Backslash,
 							glutin::VirtualKeyCode::Semicolon => Semicolon,
-							glutin::VirtualKeyCode::Escape => Esc,
+							glutin::VirtualKeyCode::Escape => Escape,
 							glutin::VirtualKeyCode::Return => Enter,
 							glutin::VirtualKeyCode::Tab => Tab,
 							glutin::VirtualKeyCode::Back => Backspace,
@@ -222,6 +238,10 @@ impl crate::Window for GlutinWindow {
 			},
 			_ => {}
 		});
+
+		if close_requested {
+			self.close_requested = true;
+		}
 
 		events
 	}
