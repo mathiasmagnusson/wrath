@@ -1,4 +1,4 @@
-use wrath_math::{
+use whmath::{
 	Float,
 	Vec3,
 	Vec4,

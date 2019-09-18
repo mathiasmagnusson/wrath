@@ -1,7 +1,7 @@
 use super::{Event, EventType};
 use crate::{Button, Overlay};
 
-use wrath_math::Float;
+use whmath::Float;
 
 pub struct MouseDownEvent {
 	is_handled: bool,

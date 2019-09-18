@@ -9,5 +9,5 @@ publish = false
 
 [dependencies]
 wrath = { path = "../wrath-engine" }
-wrath-math = { path = "../wrath-math" }
+whmath = { git = "https://github.com/mathiasmagnusson/whmath" }
 rand = "0.7.0"

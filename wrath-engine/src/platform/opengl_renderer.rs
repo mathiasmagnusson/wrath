@@ -2,7 +2,7 @@ use crate::{
 	BufferLayout, Indices, MeshHandle, Renderer, ShaderHandle, ShaderType, ShaderUniform, Vertices,
 };
 
-use wrath_math::Vec3;
+use whmath::Vec3;
 
 use std::collections::HashMap;
 use std::ffi::CString;

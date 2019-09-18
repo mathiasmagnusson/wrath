@@ -3,7 +3,7 @@ use super::{
 	shader::{ShaderHandle, ShaderUniform},
 };
 
-use wrath_math::Vec3;
+use whmath::Vec3;
 
 use std::path::Path;
 

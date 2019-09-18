@@ -8,5 +8,5 @@ edition = "2018"
 
 [dependencies]
 gl = "0.13"
-wrath-math = { path = "../wrath-math" }
+whmath = { git = "https://github.com/mathiasmagnusson/whmath" }
 glutin = "0.21"
