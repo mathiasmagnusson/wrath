@@ -1,7 +1,7 @@
-use whmath::{
+use whm::{
 	Float,
-	Vec3,
-	Vec4,
+	Vector3,
+	Vector4,
 };
 
 use std::fmt;
@@ -47,8 +47,8 @@ impl fmt::Display for ShaderType {
 
 pub enum ShaderUniform {
 	Float(Float),
-	Vec3(Vec3),
-	Vec4(Vec4),
+	Vector3(Vector3),
+	Vector4(Vector4),
 	I32(i32),
 	U32(u32),
 }
@@ -59,15 +59,15 @@ impl Into<ShaderUniform> for Float {
 	}
 }
 
-impl Into<ShaderUniform> for Vec3 {
+impl Into<ShaderUniform> for Vector3 {
 	fn into(self) -> ShaderUniform {
-		ShaderUniform::Vec3(self)
+		ShaderUniform::Vector3(self)
 	}
 }
 
-impl Into<ShaderUniform> for Vec4 {
+impl Into<ShaderUniform> for Vector4 {
 	fn into(self) -> ShaderUniform {
-		ShaderUniform::Vec4(self)
+		ShaderUniform::Vector4(self)
 	}
 }
 

@@ -37,8 +37,8 @@ impl ExampleOverlay {
 impl Overlay for ExampleOverlay {
 	fn on_attach(&mut self, renderer: &mut dyn Renderer) {
 		let layout = BufferLayout::new(&[
-			BufferElement::Vec3,
-			BufferElement::Vec4,
+			BufferElement::Vector3,
+			BufferElement::Vector4,
 		]);
 		let indices = Indices::U8(vec![
 			0, 1, 2,

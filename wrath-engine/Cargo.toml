@@ -8,5 +8,5 @@ edition = "2018"
 
 [dependencies]
 gl = "0.13"
-whmath = { git = "https://github.com/mathiasmagnusson/whmath" }
+whm = { git = "https://github.com/mathiasmagnusson/whm" }
 glutin = "0.21"

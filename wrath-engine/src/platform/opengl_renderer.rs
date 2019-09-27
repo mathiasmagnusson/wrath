@@ -2,7 +2,7 @@ use crate::{
 	BufferLayout, Indices, MeshHandle, Renderer, ShaderHandle, ShaderType, ShaderUniform, Vertices,
 };
 
-use whmath::Vec3;
+use whm::Vector3;
 
 use std::collections::HashMap;
 use std::ffi::CString;
@@ -10,7 +10,7 @@ use std::fs;
 use std::path::Path;
 
 pub struct OpenGLRenderer {
-	clear_color: Vec3,
+	clear_color: Vector3,
 	handle_counter: u32,
 	shaders: HashMap<ShaderHandle, Shader>,
 	bound_shader: ShaderHandle,
@@ -67,7 +67,7 @@ impl Drop for OpenGLRenderer {
 }
 
 impl Renderer for OpenGLRenderer {
-	fn set_clear_color(&mut self, color: Vec3) {
+	fn set_clear_color(&mut self, color: Vector3) {
 		if color != self.clear_color {
 			unsafe { gl::ClearColor(color.r(), color.g(), color.b(), 1.0) };
 			self.clear_color = color;
@@ -122,8 +122,8 @@ impl Renderer for OpenGLRenderer {
 
 			gl_call("glUniform*", || match val {
 				ShaderUniform::Float(val) => gl::Uniform1f(location, val),
-				ShaderUniform::Vec3(val) => gl::Uniform3f(location, val[0], val[1], val[2]),
-				ShaderUniform::Vec4(val) => gl::Uniform4f(location, val[0], val[1], val[2], val[3]),
+				ShaderUniform::Vector3(val) => gl::Uniform3f(location, val[0], val[1], val[2]),
+				ShaderUniform::Vector4(val) => gl::Uniform4f(location, val[0], val[1], val[2], val[3]),
 				ShaderUniform::I32(val) => gl::Uniform1i(location, val),
 				ShaderUniform::U32(val) => gl::Uniform1ui(location, val),
 			});

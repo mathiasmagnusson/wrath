@@ -41,8 +41,8 @@ impl wrath::CallbackHandler for Application {
 
 const COLS: u32 = 16;
 const ROWS: u32 = 10;
-const SNAKE_COLOR: whmath::Vec4 = whmath::Vec4::new(0.0, 1.0, 0.0, 1.0);
-const FRUIT_COLOR: whmath::Vec4 = whmath::Vec4::new(1.0, 0.0, 0.0, 1.0);
+const SNAKE_COLOR: whm::Vector4 = whm::Vector4::new(0.0, 1.0, 0.0, 1.0);
+const FRUIT_COLOR: whm::Vector4 = whm::Vector4::new(1.0, 0.0, 0.0, 1.0);
 
 struct SnakeOverlay {
 	cube_mesh: wrath::MeshHandle,
@@ -162,7 +162,7 @@ impl wrath::Overlay for SnakeOverlay {
 				1.0, 0.0, 0.0,
 			]),
 			&wrath::BufferLayout::new(&[
-				wrath::BufferElement::Vec3
+				wrath::BufferElement::Vector3
 			]),
 			&wrath::Indices::U8(vec![
 				0, 1, 2,

@@ -1,6 +1,6 @@
 use crate::{Button, Renderer};
 
-use whmath::Float;
+use whm::Float;
 
 use std::time::Duration;
 

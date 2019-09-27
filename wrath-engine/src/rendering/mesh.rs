@@ -1,7 +1,7 @@
-use whmath::{
+use whm::{
 	Float,
-	Vec3,
-	Vec4,
+	Vector3,
+	Vector4,
 };
 
 pub struct Vertices(Vec<Float>);
@@ -56,21 +56,21 @@ impl BufferLayout {
 
 #[derive(Clone, Copy)]
 pub enum BufferElement {
-	Vec3,
-	Vec4,
+	Vector3,
+	Vector4,
 }
 
 impl BufferElement {
 	pub fn count(&self) -> usize {
 		match self {
-			BufferElement::Vec3 => Vec3::len(),
-			BufferElement::Vec4 => Vec4::len(),
+			BufferElement::Vector3 => Vector3::len(),
+			BufferElement::Vector4 => Vector4::len(),
 		}
 	}
 	pub fn size(&self) -> usize {
 		match self {
-			BufferElement::Vec3 => std::mem::size_of::<Vec3>(),
-			BufferElement::Vec4 => std::mem::size_of::<Vec4>(),
+			BufferElement::Vector3 => std::mem::size_of::<Vector3>(),
+			BufferElement::Vector4 => std::mem::size_of::<Vector4>(),
 		}
 	}
 }

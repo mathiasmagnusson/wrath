@@ -3,13 +3,13 @@ use super::{
 	shader::{ShaderHandle, ShaderUniform},
 };
 
-use whmath::Vec3;
+use whm::Vector3;
 
 use std::path::Path;
 
 pub trait Renderer {
 	fn clear(&mut self);
-	fn set_clear_color(&mut self, color: Vec3);
+	fn set_clear_color(&mut self, color: Vector3);
 	fn create_shader(&mut self, path: &Path) -> ShaderHandle;
 	fn bind_shader(&mut self, handle: ShaderHandle);
 	fn delete_shader(&mut self, handle: ShaderHandle);

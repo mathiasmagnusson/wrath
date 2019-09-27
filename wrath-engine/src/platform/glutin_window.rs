@@ -1,6 +1,6 @@
 use crate::{events::*, input::get_mouse_position, Button, Event, Window, WindowProps};
 
-use whmath::Float;
+use whm::Float;
 
 pub struct GlutinWindow {
 	win_ctx: glutin::WindowedContext<glutin::PossiblyCurrent>,
